@@ -1,0 +1,27 @@
+{
+  "name": "file-storage-api",
+  "version": "1.0.0",
+  "description": "an API for file storage and download",
+  "main": "fileStorage.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kray",
+  "license": "ISC",
+  "dependencies": {
+    "@types/multer": "^1.4.7",
+    "body-parser": "^1.20.2",
+    "connect-busboy": "^1.0.0",
+    "crc": "^4.3.2",
+    "express": "^4.18.2",
+    "mime": "^3.0.0",
+    "mime-types": "^2.1.35",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.2.1",
+    "typescript": "^5.0.4"
+  }
+}
