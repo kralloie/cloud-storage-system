@@ -1,4 +1,4 @@
-# Cloud-Storage-Sys![Alt Text](path/to/image.png)tem
+# Cloud-Storage-System
 A Cloud Storage System with a REST API and a Qt application to perform CRUD operations on the cloud storage.
 
 The files inside the API in the storage are just test files to perform operations, they are not necessary.
