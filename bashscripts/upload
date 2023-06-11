@@ -1,0 +1,27 @@
+#! /usr/bin/sh
+filepath=$1
+filetype=""
+script_dir="$(dirname "$(readlink -f "$0")")"
+js_file="$script_dir/../cloudapi/server.js"
+port_var="PORT"
+port_value=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
+echo "$port_value"
+
+if [ -z $filepath ]; then
+	echo "Please specify a file to upload"
+	exit 1
+fi	
+
+filename=$(basename $filepath)
+
+if [[ $2 == "image" ]]; then
+	filetype="images"
+elif [[ $2 == "text" ]]; then
+	filetype="texts"
+else
+	echo "Please specify "text" or "image" file type as second argument"
+	exit 1
+fi
+
+filename=$(basename "$filepath")
+curl -X POST -F "file=@$filepath" "http://localhost:$port_value/$filetype?file=$filename"

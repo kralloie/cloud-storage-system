@@ -29,6 +29,7 @@ textRouter.get('/',(req,res) =>{
 textRouter.post('/', upload.single('file'),(req,res) =>{
     console.log('Post request received');
     var fileName = req.query.file;
+    console.log(fileName);
     const [fName, fExt] = fileName.split('.');
     const fileBuffer = req.file.buffer;
     var duplicatedNum = 0;
