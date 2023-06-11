@@ -28,11 +28,12 @@ app.get('/',(req,res) =>{
             images: [],
             texts: []
         }
-        storageJSON.texts = fs.readdirSync('./storage/texts');
-        storageJSON.images = fs.readdirSync('./storage/images');
+        storageJSON.texts = fs.readdirSync(path.join(path.dirname(__filename),"./storage/texts"));
+        storageJSON.images = fs.readdirSync(path.join(path.dirname(__filename),"./storage/images"));
         res.status(200).json(storageJSON);
     }
-    catch{
+    catch(err){
+        console.log(err);
         res.status(504).send('Server error');
     }
 })

@@ -6,7 +6,7 @@ const multer = require('multer')
 const { typemap } = require('../tools/typehandlermap');
 
 const textRouter = express.Router();
-const textStorageDir = './storage/texts/'
+const textStorageDir = path.join(path.dirname(__filename),'../storage/texts/')
 const upload = multer();
 
 textRouter.get('/',(req,res) =>{

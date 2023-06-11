@@ -5,7 +5,7 @@ const path = require('path')
 const multer = require('multer')
 
 const imagesRouter = express.Router();
-const imageStorageDir = './storage/images/'
+const imageStorageDir = path.join(path.dirname(__filename),'../storage/images/')
 const upload = multer();
 
 imagesRouter.get('/',(req,res) =>{
