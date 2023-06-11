@@ -6,7 +6,27 @@ const multer = require('multer')
 const bodyParser = require('body-parser');
 const {PDFDocument, StandardFonts} = require('pdf-lib');
 
-const typemap = new Map([
+class typeMap extends Map
+{
+    constructor(entries)
+    {
+        super(entries);
+    }
+
+    get(key)
+    {
+        if(this.has(key))
+        {
+            return super.get(key);
+        }
+        else
+        {
+            return super.get('fallback');
+        }
+    }
+}
+
+const typemap = new typeMap([
     ['application/json', fileBuffer =>{
         console.log("called");
         const fileJSON = JSON.parse(fileBuffer);
@@ -22,12 +42,16 @@ const typemap = new Map([
         })
     }],
     ['application/pdf',async fileBuffer =>{
-        var pdfDoc;
-        PDFDocument.load(fileBuffer)
-        .then((result) =>{
-            pdfDoc = result;
+        const fileString = fileBuffer.toString()
+        return new Promise(resolve => {
+            resolve(fileString);
         })
-        const pages = pdfDoc.getPages();
+    }],
+    ['fallback', async fileBuffer =>{
+        const fileString = fileBuffer.toString()
+        return new Promise(resolve =>{
+            resolve(fileString);
+        })
     }]
 ])
 

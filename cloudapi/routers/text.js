@@ -69,16 +69,7 @@ textRouter.patch('/',upload.single('file'),async (req,res) =>{
     const fileBuffer = req.file.buffer;
     const [fileName,fileExt] = req.query.file.split('.');
     const fileType = mime.lookup(fileExt);
-    //let fileString = await typemap.get(fileType)(fileBuffer);
-    let fileString = fileBuffer.toString();
-    try
-    {
-        const JSONFile = JSON.parse(fileString);
-        fileString = JSON.stringify(JSONFile,null,4);
-    }
-    catch(err){
-        console.log(err);
-    }
+    let fileString = await typemap.get(fileType)(fileBuffer);
 
     fs.readdir(textStorageDir,(err,files) =>{
         

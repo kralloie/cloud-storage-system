@@ -13,5 +13,5 @@ _start:
 
 section data:
 
-	msg db "testest", 0x0a
+	msg db "testeseet", 0x0a
 	len equ $ - msg
