@@ -6,3 +6,9 @@ The files inside the API in the storage are just test files to perform operation
 
 UI:
 ![UI example](./images/ui.png)
+
+
+Bash script example:
+
+
+![Script example](./images/bashscript.png)
