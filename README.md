@@ -13,7 +13,7 @@ Bash script example:
 
 ![Script example](./images/bashscript.png)
 
-Commands:
+Bash commands:
 
 ``~$ download <file> <where>`` Downloads the specified file in the specified path, defaults to the current directory if path is not specified.
 
