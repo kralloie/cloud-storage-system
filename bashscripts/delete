@@ -2,7 +2,23 @@
 target=$1
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
+filetype="images"
+fileext=$(expr "$target" : '.*\.\(.*\)$')
+imagetypes=("png" "jpg" "jpeg" "webm")
 port_var="PORT"
 port_value=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
 
-curl -X DELETE http://localhost:$port_value/texts?file=$target
+if [ -z $target ]; then
+    echo "Please specify a target file to delete"
+    exit 1
+fi
+
+for element in "${imagetypes[@]}"; do 
+
+	if [[ "$element" == "$fileext" ]]; then
+		filetype="images"
+	fi
+
+done
+
+curl -X DELETE http://localhost:$port_value/$filetype?file=$target

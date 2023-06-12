@@ -1,7 +1,9 @@
 #!/usr/bin/sh
 filename=$1
-filetype=$2
 downloaddir=$3
+filetype="texts"
+fileext=$(expr "$filename" : '.*\.\(.*\)$')
+imagetypes=("png" "jpg" "jpeg" "webm")
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
 port_var="PORT"
@@ -10,16 +12,18 @@ port_value=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
 if [ -z $filename ]; then
 	echo "Please specify a file to upload"
 	exit 1
-fi	
-
-
-if [[ $2 == "image" ]]; then
-	filetype="images"
-elif [[ $2 == "text" ]]; then
-	filetype="texts"
-else
-	echo "Please specify "text" or "image" file type as second argument"
-	exit 1
 fi
+
+if [ -z $downloaddir ]; then
+	downloaddir="./"
+fi
+
+for element in "${imagetypes[@]}"; do 
+
+	if [[ "$element" == "$fileext" ]]; then
+		filetype="images"
+	fi
+
+done
 
 curl -X GET http://localhost:$port_value/$filetype?file=$filename -o $downloaddir/$filename

@@ -1,6 +1,10 @@
 #! /usr/bin/sh
 filepath=$1
-filetype=""
+filename=$(basename $filepath)
+filetype="texts"
+fileext=$(expr "$filename" : '.*\.\(.*\)$')
+echo "$fileext"
+imagetypes=("png" "jpg" "jpeg" "webm")
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
 port_var="PORT"
@@ -12,16 +16,17 @@ if [ -z $filepath ]; then
 	exit 1
 fi	
 
-filename=$(basename $filepath)
-
-if [[ $2 == "image" ]]; then
-	filetype="images"
-elif [[ $2 == "text" ]]; then
-	filetype="texts"
-else
-	echo "Please specify "text" or "image" file type as second argument"
-	exit 1
+if [ -z $downloaddir ]; then
+	downloaddir="./"
 fi
+
+for element in "${imagetypes[@]}"; do 
+
+	if [[ "$element" == "$fileext" ]]; then
+		filetype="images"
+	fi
+
+done
 
 filename=$(basename "$filepath")
 curl -X POST -F "file=@$filepath" "http://localhost:$port_value/$filetype?file=$filename"
