@@ -7,6 +7,7 @@
 #include <QNetworkRequest>
 #include <QMessageBox>
 #include <QFile>
+#include <QImage>
 #include <QFileInfo>
 #include <QMimeDatabase>
 #include <QMimeData>
@@ -60,7 +61,6 @@ private slots:
     void sendDeleteRequest(const QUrl& url);
     void uploadFile(QByteArray& fileBuffer, QUrl& url);
     void handlePostRequest(QHttpMultiPart* payload, QNetworkRequest& request);
-    void on_getRequest_clicked();
     void updateStorage();
     void setImagePreview(const QByteArray& pixmapParam);
     void on_fileViewer_clicked(const QModelIndex &index);
@@ -69,14 +69,13 @@ private slots:
     void on_uploadButton_clicked();
     void on_deleteButton_clicked();
     void on_reloadButton_clicked();
-
     void on_undoButton_clicked();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;
     QVector<tempFile> deletedFiles;
     Ui::MainWindow *ui;
-    QNetworkAccessManager* netManager;
+    QNetworkAccessManager* netManager = new QNetworkAccessManager(this);
     QMimeDatabase mimeDatabase;
     QString selectedFile;
     QString selectedFileType;

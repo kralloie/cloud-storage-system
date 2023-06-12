@@ -1,12 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    ,baseUrl("http://localhost:8080")
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),baseUrl("http://localhost:8080")
 {
-    netManager = new QNetworkAccessManager(this);
     {
         QColor baseColor(QStringLiteral("#32383D"));
         QColor complementColor(QStringLiteral("#202529"));
@@ -81,11 +77,10 @@ void MainWindow::updateStorage()
 
 void MainWindow::sendGetRequest(const QUrl &url)
 {
-    qDebug() << QString("GET");
     QNetworkRequest request;
     request.setUrl(url);
     QNetworkReply* reply = netManager->get(request);
-    connect(reply,&QNetworkReply::readyRead,this,[this,reply]() -> void{
+    connect(reply,&QNetworkReply::finished,this,[this,reply]() -> void{
         handleGetResponse(reply);
     });
 }
@@ -95,6 +90,19 @@ void MainWindow::handleGetResponse(QNetworkReply* reply)
     QByteArray responseData = reply->readAll();
     QByteArray fileType = reply->rawHeader("File-Type");
     QByteArray contentType = reply->rawHeader("Content-Type");
+    QByteArray checksum = reply->rawHeader("Checksum");
+    int byteAmount = 0;
+    for(int i = 0; i < responseData.length(); i++)
+    {
+        byteAmount += static_cast<quint8>(responseData[i]);
+    }
+    int chksm = byteAmount % 16;
+    int svchksm = checksum.toInt();
+    if(chksm != svchksm)
+    {
+        QMessageBox::critical(this,"Checksum error","The checksum doesn't match, possible data corruption");
+    }
+
 
     if(fileType == "text")
     {
@@ -111,7 +119,6 @@ void MainWindow::handleGetResponse(QNetworkReply* reply)
     }
     else if(fileType == "image")
     {
-        qDebug() << QString("image detected");
         setImagePreview(responseData);
         ui->responseDisplay->setPlainText(nullptr);
     }
@@ -149,13 +156,6 @@ void MainWindow::updateFileViewer()
     model->setHeaderData(0,Qt::Horizontal,"File Viewer");
     ui->fileViewer->setModel(model);
 }
-
-
-void MainWindow::on_getRequest_clicked()
-{
-    sendGetRequest(QUrl("http://localhost:8080"));
-}
-
 
 void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
 {
