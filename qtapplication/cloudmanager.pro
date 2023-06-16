@@ -23,3 +23,8 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    My_Resources.qrc
+RC_ICONS = :/icons/cloud.ico
+

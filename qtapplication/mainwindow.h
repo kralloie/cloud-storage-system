@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
+#include <QCryptographicHash>
 #include <QNetworkRequest>
 #include <QMessageBox>
 #include <QFile>

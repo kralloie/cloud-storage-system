@@ -4,6 +4,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),baseUrl("http://localhost:8080")
 {
     {
+        QApplication::setStyle("fusion");
         QColor baseColor(QStringLiteral("#32383D"));
         QColor complementColor(QStringLiteral("#202529"));
         QColor disabledColor(QStringLiteral("#4C555C"));
@@ -26,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         darkPalette.setColor(QPalette::ToolTipBase, highlightColor);
         darkPalette.setColor(QPalette::ToolTipText, Qt::white);
         darkPalette.setColor(QPalette::Window, complementColor);
-        darkPalette.setColor(QPalette::WindowText, Qt::white);
         darkPalette.setColor(QPalette::WindowText, Qt::white);
         QApplication::setPalette(darkPalette);
     }
@@ -90,19 +90,6 @@ void MainWindow::handleGetResponse(QNetworkReply* reply)
     QByteArray responseData = reply->readAll();
     QByteArray fileType = reply->rawHeader("File-Type");
     QByteArray contentType = reply->rawHeader("Content-Type");
-    QByteArray checksum = reply->rawHeader("Checksum");
-    int byteAmount = 0;
-    for(int i = 0; i < responseData.length(); i++)
-    {
-        byteAmount += static_cast<quint8>(responseData[i]);
-    }
-    int chksm = byteAmount % 16;
-    int svchksm = checksum.toInt();
-    if(chksm != svchksm)
-    {
-        QMessageBox::critical(this,"Checksum error","The checksum doesn't match, possible data corruption");
-    }
-
 
     if(fileType == "text")
     {

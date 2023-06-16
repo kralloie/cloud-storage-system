@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="My_Resources.qrc">
+    <normaloff>:/icons/cloud.ico</normaloff>:/icons/cloud.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -164,6 +168,8 @@ border-radius: 5px;
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="My_Resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
