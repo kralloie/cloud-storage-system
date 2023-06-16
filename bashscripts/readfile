@@ -1,0 +1,25 @@
+#! /usr/bin/sh
+filename=$1
+fileext=$(expr "$filename" : '.*\.\(.*\)$')
+filetype="texts"
+script_dir="$(dirname "$(readlink -f "$0")")"
+js_file="$script_dir/../cloudapi/server.js"
+imagetypes=("png" "jpg" "jpeg" "webm")
+port_var="PORT"
+port_val=$(grep -oP "(?<=const $port_var = )\d+" "$js_file");
+
+
+if [ -z $filename ]; then
+    echo "Please specify a file to read"
+    exit 1
+fi
+
+for element in "${imagetypes[@]}"; do
+
+    if [[ $element == $fileext ]]; then
+        filetype="images"
+    fi
+
+done
+
+curl -X GET http://localhost:$port_val/$filetype?file=$filename

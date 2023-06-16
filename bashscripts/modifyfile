@@ -1,0 +1,29 @@
+#! /usr/bin/sh
+filename=$1
+fileext=$(expr "$filename" : '.*\.\(.*\)$')
+script_dir="$(dirname "$(readlink -f "$0")")"
+js_file="$script_dir/../cloudapi/server.js"
+port_var="PORT"
+port_val=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
+
+if [ -z "$filename" ]; then
+    echo "Please specify a file to modify"
+fi
+
+file_content=$(curl -X GET -s http://localhost:8080/texts?file=$filename)
+
+if [ -z "$file_content" ]; then
+    echo "File not found"
+    exit 1
+fi
+
+tmpfile="./modified_file.txt"
+echo "$file_content" > "$tmpfile"
+
+vim "$tmpfile"
+
+read -p "Save modified file in the cloud? (Press enter)"
+
+modified_content=$(cat "$tmpfile")
+
+curl -X PATCH -F "file=@./modified_file.txt" http://localhost:$port_val/texts?file=$filename 

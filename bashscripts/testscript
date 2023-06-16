@@ -1,0 +1,5 @@
+#! /usr/bin/sh
+parameter=$1
+extractedparam=$(expr $parameter : '.*[aAbB]\(.*\)$');
+
+echo $extractedparam
