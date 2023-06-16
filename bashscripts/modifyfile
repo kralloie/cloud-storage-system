@@ -24,6 +24,4 @@ vim "$tmpfile"
 
 read -p "Save modified file in the cloud? (Press enter)"
 
-modified_content=$(cat "$tmpfile")
-
 curl -X PATCH -F "file=@./modified_file.txt" http://localhost:$port_val/texts?file=$filename 
