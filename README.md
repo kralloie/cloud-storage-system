@@ -22,3 +22,5 @@ Bash commands:
 ``~$ upload <file>`` Uploads the specified file to the cloud storage.
 
 ``~$ getcloudstorage`` Returns a formatted JSON with the storage content.
+
+``~$ modifyfile <file>`` Opens Vim with the specified file and lets you modify it, use `:wq` to exit Vim
