@@ -12,6 +12,18 @@ const upload = multer();
 textRouter.get('/',(req,res) =>{
     const file = req.query.file;
     const fileExt = path.extname(file);
+    var byteAmount = 0;
+    var checksum;
+
+    if(fileExt == "")
+    {
+        var fileType = ".txt"
+    }
+    else
+    {
+        fileType = fileExt;
+    }
+
     const fileDir = path.join(textStorageDir,file);
     fs.readdir(textStorageDir, (err,files) =>{
         if(files.includes(file)){
@@ -20,7 +32,11 @@ textRouter.get('/',(req,res) =>{
                 {
                     throw err
                 }
-                return res.status(200).contentType(mime.lookup(fileExt)).setHeader('File-Type','text').send(data);
+
+                return res.status(200)
+                .contentType(mime.lookup(fileType))
+                .setHeader('File-Type','text')
+                .send(data);
             });
         } else { return res.status(404).send('File not found \n'); }
     })
@@ -29,7 +45,8 @@ textRouter.get('/',(req,res) =>{
 textRouter.post('/', upload.single('file'),(req,res) =>{
     console.log('Post request received');
     var fileName = req.query.file;
-    const [fName, fExt] = fileName.split('.');
+    const[fName, fExt] = fileName.split('.'); 
+
     const fileBuffer = req.file.buffer;
     var duplicatedNum = 0;
     fs.readdir(textStorageDir,(err,files) =>{
@@ -43,9 +60,11 @@ textRouter.post('/', upload.single('file'),(req,res) =>{
         fs.writeFile(saveDir, fileBuffer, (err) =>{
             if(err)
             {
-               return res.status(500).send('Error while saving the file. \n');
+               return res.status(500)
+               .send('Error while saving the file. \n');
             }
-            return res.status(200).send('File saved correctly \n');
+            return res.status(200)
+            .send('File saved correctly \n');
         })
     })
 })
@@ -83,11 +102,18 @@ textRouter.patch('/',upload.single('file'),async (req,res) =>{
             fs.writeFile(path.join(textStorageDir,targetFile), fileString, (err) =>{
                 if(err)
                 {
-                    res.status(500).send('Error while updating the file. \n');
+                    res.status(500)
+                    .send('Error while updating the file. \n');
                 }
-                res.status(200).send('File updated correctly. \n')
+                res.status(200)
+                .send('File updated correctly. \n')
             })
-        } else { res.status(504).send(`File ${targetFile} not found for updating.`) }
+        } 
+        else 
+        { 
+            res.status(504)
+            .send(`File ${targetFile} not found for updating.`) 
+        }
     })
 })
 

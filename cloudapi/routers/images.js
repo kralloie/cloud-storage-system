@@ -9,8 +9,11 @@ const imageStorageDir = path.join(path.dirname(__filename),'../storage/images/')
 const upload = multer();
 
 imagesRouter.get('/',(req,res) =>{
+    var byteAmount = 0;
+    var checksum;
     const file = req.query.file;
     const fileDir = path.join(imageStorageDir,file);
+    const fileExt = path.extname(file);
     fs.readdir(imageStorageDir, (err,files) =>{
         if(files.includes(file)){
             fs.readFile(fileDir,(err,data) =>{
@@ -18,10 +21,18 @@ imagesRouter.get('/',(req,res) =>{
                 {
                     throw err
                 }
-                const fileExt = path.extname(file);
-                return res.status(200).contentType(mime.lookup(fileExt)).setHeader('File-Type','image').send(data);
+
+                return res.status(200)
+                .contentType(mime.lookup(fileExt))
+                .setHeader('File-Type','image')
+                .send(data);
             });
-        } else { return res.status(404).send('File not found \n'); }
+        } 
+        else 
+        { 
+            return res.status(404)
+            .send('File not found \n'); 
+        }
     })
 })
 
@@ -42,9 +53,11 @@ imagesRouter.post('/', upload.single('file'),(req,res) =>{
         fs.writeFile(saveDir, fileBuffer, (err) =>{
             if(err)
             {
-               return res.status(500).send('Error while saving the file. \n');
+               return res.status(500)
+               .send('Error while saving the file. \n');
             }
-            return res.status(200).send('File saved correctly \n');
+            return res.status(200)
+            .send('File saved correctly \n');
         })
     })
 })
@@ -55,10 +68,13 @@ imagesRouter.delete('/',(req,res) =>{
         fs.unlink(path.join(imageStorageDir,file), err =>{
             if(err)
             {
-                return res.status(500).send('Error while deleting the file. \n')
+                console.log('couldnt delete');
+                return res.status(500)
+                .send('Error while deleting the file. \n')
             }
 
-            res.status(200).send(`File deleted successfully \n`)
+            res.status(200)
+            .send(`File deleted successfully \n`)
         })
     })
 })
