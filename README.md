@@ -12,3 +12,13 @@ Bash script example:
 
 
 ![Script example](./images/bashscript.png)
+
+Bash commands:
+
+``~$ download <file> <where>`` Downloads the specified file in the specified path, defaults to the current directory if path is not specified.
+
+``~$ delete <file>`` Delete the specified file in the cloud storage.
+
+``~$ upload <file>`` Uploads the specified file to the cloud storage.
+
+``~$ getcloudstorage`` Returns a formatted JSON with the storage content.
