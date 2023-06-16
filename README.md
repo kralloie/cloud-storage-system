@@ -4,17 +4,19 @@ A Cloud Storage System with a REST API and a Qt application to perform CRUD oper
 The files inside the API in the storage are just test files to perform operations, they are not necessary.
 
 
-UI:
+## UI:
 ![UI example](./images/ui.png)
 
 
-Bash script example:
+### Bash script example:
 
 
 ![Script example](./images/bashscript.png)
 
-Bash commands:
 
+## Bash commands:
+
+```
 ``~$ download <file> <where>`` Downloads the specified file in the specified path, defaults to the current directory if path is not specified.
 
 ``~$ delete <file>`` Delete the specified file in the cloud storage.
@@ -24,3 +26,4 @@ Bash commands:
 ``~$ getcloudstorage`` Returns a formatted JSON with the storage content.
 
 ``~$ modifyfile <file>`` Opens Vim with the specified file and lets you modify it, use `:wq` to exit Vim
+```
