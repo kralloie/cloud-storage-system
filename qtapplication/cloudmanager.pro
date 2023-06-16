@@ -26,5 +26,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     My_Resources.qrc
-RC_ICONS = cloud.ico
-
