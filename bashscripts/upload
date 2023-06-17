@@ -3,13 +3,11 @@ filepath=$1
 filename=$(basename $filepath)
 filetype="texts"
 fileext=$(expr "$filename" : '.*\.\(.*\)$')
-echo "$fileext"
 imagetypes=("png" "jpg" "jpeg" "webm")
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
 port_var="PORT"
 port_value=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
-echo "$port_value"
 
 if [ -z $filepath ]; then
 	echo "Please specify a file to upload"
