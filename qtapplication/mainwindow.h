@@ -5,11 +5,15 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QCryptographicHash>
+#include <QTextStream>
+#include <QIODevice>
 #include <QNetworkRequest>
 #include <QMessageBox>
 #include <QFile>
 #include <QImage>
 #include <QFileInfo>
+#include <QFileDialog>
+#include <QDir>
 #include <QMimeDatabase>
 #include <QMimeData>
 #include <QMimeType>
@@ -59,6 +63,7 @@ private slots:
     void handlePatchRequest(QNetworkRequest& request, QHttpMultiPart* payload);
     void sendPatchRequest(const QUrl &url,const QByteArray &payloadData);
     void updateFileViewer();
+    void handleDownload(QNetworkReply* reply, const QString& filename, const QString& path);
     void sendDeleteRequest(const QUrl& url);
     void uploadFile(QByteArray& fileBuffer, QUrl& url);
     void handlePostRequest(QHttpMultiPart* payload, QNetworkRequest& request);
@@ -71,6 +76,8 @@ private slots:
     void on_deleteButton_clicked();
     void on_reloadButton_clicked();
     void on_undoButton_clicked();
+
+    void on_downloadButton_clicked();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;

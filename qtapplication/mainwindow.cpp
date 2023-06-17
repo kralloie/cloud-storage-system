@@ -146,6 +146,7 @@ void MainWindow::updateFileViewer()
 
 void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
 {
+    selectedFile = "";
     QStandardItemModel* modelPtr = dynamic_cast<QStandardItemModel*>(ui->fileViewer->model());
     QStandardItem* selectedItem = modelPtr->itemFromIndex(index);
     QString itemString = selectedItem->text();
@@ -156,7 +157,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
         targetQuery.addQueryItem("file",itemString);
         targetUrl.setQuery(targetQuery);
         selectedFile = itemString;
-        selectedFileType = QString("texts");
+        selectedFileType = "texts";
         sendGetRequest(targetUrl);
     }
     else if(imagesList.contains(itemString))
@@ -310,13 +311,20 @@ void MainWindow::sendDeleteRequest(const QUrl& url)
 
 void MainWindow::on_deleteButton_clicked()
 {
-    QString targetFile = selectedFile;
-    QUrl url = QStringLiteral("http://localhost:8080/%1?file=%2").arg(selectedFileType,targetFile);
-    QNetworkRequest tempRequest(url);
-    QNetworkReply* tempReply = netManager->get(tempRequest);
-    connect(tempReply,&QNetworkReply::finished,[this,url,tempReply]() -> void {
-        handleTempStorage(tempReply,url);
-    });
+    if(selectedFile != "")
+    {
+        QString targetFile = selectedFile;
+        QUrl url = QStringLiteral("http://localhost:8080/%1?file=%2").arg(selectedFileType,targetFile);
+        QNetworkRequest tempRequest(url);
+        QNetworkReply* tempReply = netManager->get(tempRequest);
+        connect(tempReply,&QNetworkReply::finished,[this,url,tempReply]() -> void {
+            handleTempStorage(tempReply,url);
+        });
+    }
+    else
+    {
+        QMessageBox::warning(this,"No file selected","No file selected to delete, please select the file that you want to delete.");
+    }
 }
 
 void MainWindow::handleTempStorage(QNetworkReply* reply,const QUrl& url)
@@ -355,3 +363,49 @@ void MainWindow::on_undoButton_clicked()
     }
 }
 
+
+void MainWindow::on_downloadButton_clicked()
+{
+    if(selectedFile != "")
+    {
+        QString filename = selectedFile;
+        QNetworkRequest request;
+        QUrl targetUrl = QStringLiteral("http://localhost:8080/%1?file=%2").arg(selectedFileType,selectedFile);
+        request.setUrl(targetUrl);
+        QString targetPath = QFileDialog::getExistingDirectory(this, "Select directory to save the file", QDir::homePath());
+
+        if(targetPath.isEmpty())
+        {
+            return;
+        }
+
+        QNetworkReply* reply = netManager->get(request);
+        connect(reply,&QNetworkReply::finished,this,[this,reply,filename,targetPath]() -> void{
+            handleDownload(reply,filename,targetPath);
+        });
+    }
+    else
+    {
+        QMessageBox::warning(this,"No file selected","Please select the file that you want to download.");
+    }
+}
+
+void MainWindow::handleDownload(QNetworkReply* reply, const QString& filename, const QString& path)
+{
+    QString absolutePath = QStringLiteral("%1/%2").arg(path,filename);
+    QFile file(absolutePath);
+    QByteArray data = reply->readAll();
+    if (file.open(QIODevice::WriteOnly))
+    {
+        if(selectedFileType == "texts")
+        {
+            QTextStream stream(&file);
+            stream << QString::fromUtf8(data);
+        }
+        else
+        {
+            file.write(data);
+        }
+    }
+    file.close();
+}
