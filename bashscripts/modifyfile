@@ -3,8 +3,7 @@ filename=$1
 fileext=$(expr "$filename" : '.*\.\(.*\)$')
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
-port_var="PORT"
-port_val=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
+port_value=$(jq -r '.PORT' "$script_dir/../cloudapi/config/serverconfig.json")
 
 if [ -z "$filename" ]; then
     echo "Please specify a file to modify"
@@ -24,4 +23,4 @@ vim "$tmpfile"
 
 read -p "Save modified file in the cloud? (Press enter)"
 
-curl -X PATCH -F "file=@./modified_file.txt" http://localhost:$port_val/texts?file=$filename 
+curl -X PATCH -F "file=@./modified_file.txt" http://localhost:$port_value/texts?file=$filename 

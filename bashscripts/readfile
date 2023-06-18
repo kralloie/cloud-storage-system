@@ -5,8 +5,7 @@ filetype="texts"
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
 imagetypes=("png" "jpg" "jpeg" "webm")
-port_var="PORT"
-port_val=$(grep -oP "(?<=const $port_var = )\d+" "$js_file");
+port_value=$(jq -r '.PORT' "$script_dir/../cloudapi/config/serverconfig.json")
 
 
 if [ -z $filename ]; then
@@ -22,4 +21,4 @@ for element in "${imagetypes[@]}"; do
 
 done
 
-curl -X GET http://localhost:$port_val/$filetype?file=$filename
+curl -X GET http://localhost:$port_value/$filetype?file=$filename

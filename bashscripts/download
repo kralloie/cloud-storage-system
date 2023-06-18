@@ -6,8 +6,7 @@ fileext=$(expr "$filename" : '.*\.\(.*\)$')
 imagetypes=("png" "jpg" "jpeg" "webm")
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
-port_var="PORT"
-port_value=$(grep -oP "(?<=const $port_var = )\d+" "$js_file")
+port_value=$(jq -r '.PORT' "$script_dir/../cloudapi/config/serverconfig.json")
 
 if [ -z $filename ]; then
 	echo "Please specify a file to upload"
