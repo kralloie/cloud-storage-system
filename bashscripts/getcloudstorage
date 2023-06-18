@@ -1,8 +1,6 @@
 #!/usr/bin/sh
 script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
-echo "$js_file"
 port_value=$(jq -r '.PORT' "$script_dir/../cloudapi/config/serverconfig.json")
-echo "$port_value"
 
 curl -X GET http://localhost:$port_value | jq
