@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     ui->portInput->setPlaceholderText("Input PORT");
     ui->portInput->setAlignment(Qt::AlignCenter);
+    ui->stateLabel->setAlignment(Qt::AlignCenter);
     ui->portInput->setMaxLength(5);
     setWindowTitle("Storage Manager");
 }
@@ -65,10 +66,26 @@ void MainWindow::updateStorage()
         selectedFile = "";
         selectedFileType = "";
         connectionState = "disconnected";
+        ui->stateLabel->setText("Disconnected");
+        ui->stateLabel->setStyleSheet(
+                "background-color:rgb(36, 31, 49);"
+                "border-style:outset;"
+                "border-width:2px;"
+                "border-color:rgb(34, 22, 37);"
+                "color:rgb(165, 29, 45);"
+        );
     }
     else
     {
         connectionState = stateHeader;
+        ui->stateLabel->setText("Connected");
+        ui->stateLabel->setStyleSheet(
+              "background-color:rgb(36, 31, 49);"
+              "border-style:outset;"
+              "border-width:2px;"
+              "border-color:rgb(34, 22, 37);"
+              "color: rgb(38, 162, 105);"
+        );
     }
 
     QJsonDocument responseJSON = QJsonDocument::fromJson(JsonData);
