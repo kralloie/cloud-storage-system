@@ -9,7 +9,7 @@ if [ -z "$filename" ]; then
     echo "Please specify a file to modify"
 fi
 
-file_content=$(curl -X GET -s http://localhost:8080/texts?file=$filename)
+file_content=$(curl -X GET -s http://localhost:$port_value/texts?file=$filename)
 
 if [ -z "$file_content" ]; then
     echo "File not found"
