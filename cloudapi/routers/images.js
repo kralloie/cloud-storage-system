@@ -9,8 +9,6 @@ const imageStorageDir = path.join(path.dirname(__filename),'../storage/images/')
 const upload = multer();
 
 imagesRouter.get('/',(req,res) =>{
-    var byteAmount = 0;
-    var checksum;
     const file = req.query.file;
     const fileDir = path.join(imageStorageDir,file);
     const fileExt = path.extname(file);

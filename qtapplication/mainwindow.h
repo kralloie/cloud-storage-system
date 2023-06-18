@@ -5,7 +5,9 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QCryptographicHash>
+#include <QRegularExpressionMatch>
 #include <QTextStream>
+#include <QRegularExpression>
 #include <QIODevice>
 #include <QNetworkRequest>
 #include <QMessageBox>
@@ -76,14 +78,17 @@ private slots:
     void on_deleteButton_clicked();
     void on_reloadButton_clicked();
     void on_undoButton_clicked();
-
     void on_downloadButton_clicked();
+
+    void on_validateButton_clicked();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;
     QVector<tempFile> deletedFiles;
     Ui::MainWindow *ui;
+    QString connectionState;
     QNetworkAccessManager* netManager = new QNetworkAccessManager(this);
+    QString PORT;
     QMimeDatabase mimeDatabase;
     QString selectedFile;
     QString selectedFileType;

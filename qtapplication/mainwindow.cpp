@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),baseUrl("http://localhost:8080")
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),connectionState(QString("disconnected"))
 {
     {
         QApplication::setStyle("fusion");
@@ -31,8 +31,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         QApplication::setPalette(darkPalette);
     }
     ui->setupUi(this);
+    ui->portInput->setPlaceholderText("Input PORT");
+    ui->portInput->setAlignment(Qt::AlignCenter);
+    ui->portInput->setMaxLength(5);
     setWindowTitle("Storage Manager");
-    updateStorage();
 }
 
 MainWindow::~MainWindow()
@@ -46,7 +48,7 @@ void MainWindow::updateStorage()
     QNetworkRequest request;
     MainWindow::textList = {};
     MainWindow::imagesList = {};
-    request.setUrl(QUrl("http://localhost:8080"));
+    request.setUrl(QUrl(QStringLiteral("http://localhost:%1").arg(PORT)));
     QNetworkReply *reply = netManager->get(request);
 
     QEventLoop eventLoop;
@@ -54,6 +56,21 @@ void MainWindow::updateStorage()
     eventLoop.exec();
 
     QByteArray JsonData = reply->readAll();
+    QString stateHeader = reply->rawHeader("Connection-State");
+    if(stateHeader.isEmpty())
+    {
+        QMessageBox::warning(this,"Unable to connect","Unable to connect to the cloud, please check if the PORT is correct and if the server is on.");
+        setImagePreview(nullptr);
+        ui->responseDisplay->setPlainText(nullptr);
+        selectedFile = "";
+        selectedFileType = "";
+        connectionState = "disconnected";
+    }
+    else
+    {
+        connectionState = stateHeader;
+    }
+
     QJsonDocument responseJSON = QJsonDocument::fromJson(JsonData);
     QJsonObject responseObject = responseJSON.object();
     QJsonValue images = responseObject.value("images");
@@ -152,7 +169,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
     QString itemString = selectedItem->text();
     if(textList.contains(itemString))
     {
-        QUrl targetUrl = QUrl("http://localhost:8080/texts");
+        QUrl targetUrl = QUrl(QStringLiteral("%1/texts").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",itemString);
         targetUrl.setQuery(targetQuery);
@@ -162,7 +179,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
     }
     else if(imagesList.contains(itemString))
     {
-        QUrl targetUrl = QUrl("http://localhost:8080/images");
+        QUrl targetUrl = QUrl(QStringLiteral("%1/images").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",itemString);
         targetUrl.setQuery(targetQuery);
@@ -227,7 +244,7 @@ void MainWindow::on_updateTextFile_clicked()
 {
     if(selectedFileType == "texts")
     {
-        QUrl targetUrl = QUrl("http://localhost:8080/texts");
+        QUrl targetUrl = QUrl(QStringLiteral("%1/texts").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",selectedFile);
         targetUrl.setQuery(targetQuery);
@@ -270,6 +287,12 @@ void MainWindow::handlePostRequest(QHttpMultiPart* payload, QNetworkRequest& req
 
 void MainWindow::on_uploadButton_clicked()
 {
+    if(connectionState == "disconnected")
+    {
+        QMessageBox::warning(this,"Disconnected","You are currently not connected to the cloud.");
+        return;
+    }
+
     QString filePath = QFileDialog::getOpenFileName(this,"Open File");
     QFileInfo fileInfo(filePath);
     QString fileName = fileInfo.fileName();
@@ -311,10 +334,16 @@ void MainWindow::sendDeleteRequest(const QUrl& url)
 
 void MainWindow::on_deleteButton_clicked()
 {
+    if(connectionState == "disconnected")
+    {
+        QMessageBox::warning(this,"Disconnected","You are currently not connected to the cloud.");
+        return;
+    }
+
     if(selectedFile != "")
     {
         QString targetFile = selectedFile;
-        QUrl url = QStringLiteral("http://localhost:8080/%1?file=%2").arg(selectedFileType,targetFile);
+        QUrl url = QStringLiteral("%1/%2?file=%3").arg(baseUrl.toString(),selectedFileType,targetFile);
         QNetworkRequest tempRequest(url);
         QNetworkReply* tempReply = netManager->get(tempRequest);
         connect(tempReply,&QNetworkReply::finished,[this,url,tempReply]() -> void {
@@ -344,16 +373,34 @@ void MainWindow::handleTempStorage(QNetworkReply* reply,const QUrl& url)
 
 void MainWindow::on_reloadButton_clicked()
 {
+    if(PORT.isEmpty())
+    {
+        QMessageBox::warning(this,"Missing Port","No port specified for connecting to the cloud.");
+        return;
+    }
+
+    if(connectionState == "disconnected")
+    {
+        QMessageBox::warning(this,"Disconnected","You are currently not connected to the cloud.");
+        return;
+    }
+
     updateStorage();
 }
 
 
 void MainWindow::on_undoButton_clicked()
 {
+    if(connectionState == "disconnected")
+    {
+        QMessageBox::warning(this,"Disconnected","You are currently not connected to the cloud.");
+        return;
+    }
+
     if(deletedFiles.size() > 0)
     {
         tempFile recoveredFile = deletedFiles.at(0);
-        QUrl recoveredFileUrl = QStringLiteral("http://localhost:8080/%1?file=%2").arg(recoveredFile.fileType,recoveredFile.fileName);
+        QUrl recoveredFileUrl = QStringLiteral("%1/%2?file=%3").arg(baseUrl.toString(),recoveredFile.fileType,recoveredFile.fileName);
         uploadFile(recoveredFile.data,recoveredFileUrl);
         deletedFiles.remove(0);
     }
@@ -366,11 +413,17 @@ void MainWindow::on_undoButton_clicked()
 
 void MainWindow::on_downloadButton_clicked()
 {
+    if(connectionState == "disconnected")
+    {
+        QMessageBox::warning(this,"Disconnected","You are currently not connected to the cloud.");
+        return;
+    }
+
     if(selectedFile != "")
     {
         QString filename = selectedFile;
         QNetworkRequest request;
-        QUrl targetUrl = QStringLiteral("http://localhost:8080/%1?file=%2").arg(selectedFileType,selectedFile);
+        QUrl targetUrl = QStringLiteral("%1/%2?file=%3").arg(baseUrl.toString(),selectedFileType,selectedFile);
         request.setUrl(targetUrl);
         QString targetPath = QFileDialog::getExistingDirectory(this, "Select directory to save the file", QDir::homePath());
 
@@ -409,3 +462,36 @@ void MainWindow::handleDownload(QNetworkReply* reply, const QString& filename, c
     }
     file.close();
 }
+
+
+
+void MainWindow::on_validateButton_clicked()
+{
+    QRegularExpression regEx("^[0-9]*$");
+    QString portString = ui->portInput->text();
+    QRegularExpressionMatch portMatch = regEx.match(portString);
+    bool isNumber = portMatch.hasMatch();
+
+    if(!isNumber)
+    {
+        QMessageBox::warning(this,"Invalid Port","The port should be a number, please don't use letters or special characters.");
+        return;
+    }
+
+    if(portString.toInt() > 65535)
+    {
+        QMessageBox::warning(this,"Invalid Port","65535 is the highest value possible for a port, please select a valid port.");
+        return;
+    }
+    else if(portString.toInt() <= 1024)
+    {
+        QMessageBox::warning(this,"Invalid Port","Ports from 0 to 1024 are reserved for specific services, choose from 1025 to 65535.");
+        return;
+    }
+
+
+    PORT = portString;
+    baseUrl = QUrl(QStringLiteral("http://localhost:%1").arg(PORT));
+    updateStorage();
+}
+

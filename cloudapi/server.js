@@ -9,7 +9,7 @@ const { textRouter } = require('./routers/text.js')
 
 const app = express();
 const upload = multer();
-const PORT = 8080;
+const PORT = 7070;
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.json());
@@ -31,6 +31,7 @@ app.get('/',(req,res) =>{
         storageJSON.texts = fs.readdirSync(path.join(path.dirname(__filename),"./storage/texts"));
         storageJSON.images = fs.readdirSync(path.join(path.dirname(__filename),"./storage/images"));
         res.status(200)
+        .setHeader('Connection-State','connected')
         .json(storageJSON);
     }
     catch(err){

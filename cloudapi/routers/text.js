@@ -76,10 +76,12 @@ textRouter.delete('/',(req,res) =>{
     fs.unlink(targetDir, err =>{
         if(err)
         {
-            return res.status(500).send('Error while deleting the file. \n')
+            return res.status(500)
+            .send('Error while deleting the file. \n')
         }
 
-        res.status(200).send(`File deleted successfully \n`)
+        res.status(200)
+        .send(`File deleted successfully \n`)
     })        
 })
 
