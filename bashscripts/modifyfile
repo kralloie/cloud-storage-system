@@ -10,8 +10,9 @@ if [ -z "$filename" ]; then
 fi
 
 file_content=$(curl -X GET -s http://localhost:$port_value/texts?file=$filename)
+echo "$file_content"
 
-if [ -z "$file_content" ]; then
+if [[ "$file_content" == "File not found" ]]; then
     echo "File not found"
     exit 1
 fi
@@ -23,4 +24,6 @@ vim "$tmpfile"
 
 read -p "Save modified file in the cloud? (Press enter)"
 
-curl -X PATCH -F "file=@./modified_file.txt" http://localhost:$port_value/texts?file=$filename 
+curl -X PATCH -F "file=@./modified_file.txt" http://localhost:$port_value/texts?file=$filename
+
+rm "./modified_file.txt"
