@@ -38,7 +38,7 @@ textRouter.get('/',(req,res) =>{
                 .setHeader('File-Type','text')
                 .send(data);
             });
-        } else { return res.status(404).send('File not found \n'); }
+        } else { return res.status(404).send("File not found"); }
     })
 })
 
