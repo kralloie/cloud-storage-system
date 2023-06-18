@@ -4,12 +4,23 @@ const mime = require('mime-types')
 const path = require('path')
 const multer = require('multer')
 const bodyParser = require('body-parser');
+const process = require('node:process');
 const { imagesRouter } = require('./routers/images.js')
 const { textRouter } = require('./routers/text.js')
+const { validatePort } = require('./tools/validateparam.js');
 
+var portParam = process.argv[2];
+
+
+var PORT = validatePort(portParam);
+const configPath = path.join(__dirname,'/config/serverconfig.json');
 const app = express();
 const upload = multer();
-const PORT = 7070;
+const configBuffer = fs.readFileSync(configPath);
+const configString = configBuffer.toString('utf-8');
+const configJSON = JSON.parse(configString);
+configJSON.PORT = PORT;
+fs.writeFileSync(configPath,JSON.stringify(configJSON));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.json());
@@ -45,3 +56,5 @@ app.get('/',(req,res) =>{
 app.listen(PORT, () =>{
     console.log(`Listening on port: ${PORT}`);
 })
+
+module.exports.PORT = PORT;
