@@ -16,14 +16,15 @@ The files inside the API in the storage are just test files to perform operation
 
 ## Bash commands:
 
-```
-``~$ download <file> <where>`` Downloads the specified file in the specified path, defaults to the current directory if path is not specified.
 
-``~$ delete <file>`` Delete the specified file in the cloud storage.
+```~$ download <file> <where>``` Downloads the specified file in the specified path, defaults to the current directory if path is not specified.
 
-``~$ upload <file>`` Uploads the specified file to the cloud storage.
+```~$ delete <file>``` Delete the specified file in the cloud storage.
 
-``~$ getcloudstorage`` Returns a formatted JSON with the storage content.
+```~$ upload <file>``` Uploads the specified file to the cloud storage.
 
-``~$ modifyfile <file>`` Opens Vim with the specified file and lets you modify it, use `:wq` to exit Vim
-```
+```~$ getcloudstorage``` Returns a formatted JSON with the storage content.
+
+```~$ modifyfile <file>``` Opens Vim with the specified file and lets you modify it, use `:wq` to exit Vim.
+
+```~$ readfile <file>``` Outputs the content of the specified file in the terminal, take care when doing this with image files.
