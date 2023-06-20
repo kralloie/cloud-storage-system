@@ -32,9 +32,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
     ui->setupUi(this);
     ui->portInput->setPlaceholderText("Input PORT");
+    ui->imagePreview->setContentsMargins(0,0,0,0);
     ui->portInput->setAlignment(Qt::AlignCenter);
     ui->stateLabel->setAlignment(Qt::AlignCenter);
     ui->portInput->setMaxLength(5);
+    connect(this,&MainWindow::windowResized,[this]() -> void{
+        if(selectedFileType == "image")
+        {
+            setImagePreview(nullptr);
+            QUrl targetUrl = QUrl(QStringLiteral("%1/images").arg(baseUrl.toString()));
+            QUrlQuery targetQuery;
+            targetQuery.addQueryItem("file",selectedFile);
+            targetUrl.setQuery(targetQuery);
+            sendGetRequest(targetUrl);
+        }
+    });
     setWindowTitle("Storage Manager");
 }
 
@@ -161,14 +173,14 @@ void MainWindow::updateFileViewer()
     model->appendRow(Texts);
     model->appendRow(Images);
 
-    for(const QString &file : MainWindow::textList)
+    for(auto& file : MainWindow::textList)
     {
         QStandardItem* item = new QStandardItem(file);
         item->setEditable(false);
         Texts->appendRow(item);
     }
 
-    for(const QString& image: MainWindow::imagesList)
+    for(auto& image: MainWindow::imagesList)
     {
         QStandardItem* item = new QStandardItem(image);
         item->setEditable(false);
@@ -181,7 +193,7 @@ void MainWindow::updateFileViewer()
 void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
 {
     selectedFile = "";
-    QStandardItemModel* modelPtr = dynamic_cast<QStandardItemModel*>(ui->fileViewer->model());
+    QStandardItemModel* modelPtr = qobject_cast<QStandardItemModel*>(ui->fileViewer->model());
     QStandardItem* selectedItem = modelPtr->itemFromIndex(index);
     QString itemString = selectedItem->text();
     if(textList.contains(itemString))
@@ -512,3 +524,8 @@ void MainWindow::on_validateButton_clicked()
     updateStorage();
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    emit windowResized();
+}

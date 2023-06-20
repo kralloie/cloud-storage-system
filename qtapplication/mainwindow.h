@@ -56,7 +56,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+signals:
+    void windowResized();
 private slots:
     void sendGetRequest(const QUrl &url);
     void cleanUpReply();
@@ -79,7 +82,6 @@ private slots:
     void on_reloadButton_clicked();
     void on_undoButton_clicked();
     void on_downloadButton_clicked();
-
     void on_validateButton_clicked();
 
 private:
