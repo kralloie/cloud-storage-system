@@ -58,8 +58,6 @@ public:
     ~MainWindow();
 protected:
     void resizeEvent(QResizeEvent *event) override;
-signals:
-    void windowResized();
 private slots:
     void sendGetRequest(const QUrl &url);
     void cleanUpReply();

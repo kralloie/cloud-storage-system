@@ -36,17 +36,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->portInput->setAlignment(Qt::AlignCenter);
     ui->stateLabel->setAlignment(Qt::AlignCenter);
     ui->portInput->setMaxLength(5);
-    connect(this,&MainWindow::windowResized,[this]() -> void{
-        if(selectedFileType == "image")
-        {
-            setImagePreview(nullptr);
-            QUrl targetUrl = QUrl(QStringLiteral("%1/images").arg(baseUrl.toString()));
-            QUrlQuery targetQuery;
-            targetQuery.addQueryItem("file",selectedFile);
-            targetUrl.setQuery(targetQuery);
-            sendGetRequest(targetUrl);
-        }
-    });
     setWindowTitle("Storage Manager");
 }
 
@@ -518,7 +507,6 @@ void MainWindow::on_validateButton_clicked()
         return;
     }
 
-
     PORT = portString;
     baseUrl = QUrl(QStringLiteral("http://localhost:%1").arg(PORT));
     updateStorage();
@@ -527,5 +515,13 @@ void MainWindow::on_validateButton_clicked()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    emit windowResized();
+    if(selectedFileType == "images")
+    {
+        setImagePreview(nullptr);
+        QUrl targetUrl = QUrl(QStringLiteral("%1/images").arg(baseUrl.toString()));
+        QUrlQuery targetQuery;
+        targetQuery.addQueryItem("file",selectedFile);
+        targetUrl.setQuery(targetQuery);
+        sendGetRequest(targetUrl);
+    }
 }
