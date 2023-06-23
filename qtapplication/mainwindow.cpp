@@ -75,6 +75,7 @@ void MainWindow::updateStorage()
                 "border-color:rgb(34, 22, 37);"
                 "color:rgb(165, 29, 45);"
         );
+        return;
     }
     else
     {
@@ -226,7 +227,7 @@ void MainWindow::sendPatchRequest(const QUrl& url,const QByteArray& payloadData)
     QNetworkRequest request(url);
     QHttpMultiPart* payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart payloadPart;
-    payloadPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"file\""));
+    payloadPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"file\"")); // tendria q usar qstringliteral y en vez d file usar selectefile en el post tmb
     payloadPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     payloadPart.setBody(payloadData);
     payload->append(payloadPart);
