@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtNetwork/QNetworkAccessManager>
+#include <openssl/aes.h>
 #include <QtNetwork/QNetworkReply>
 #include <QCryptographicHash>
 #include <QRegularExpressionMatch>
@@ -48,6 +49,13 @@ class tempFile
         QString fileType;
 };
 
+class user
+{
+    public:
+        QString username;
+        bool isAdmin;
+        qint32 userId;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -81,11 +89,14 @@ private slots:
     void on_undoButton_clicked();
     void on_downloadButton_clicked();
     void on_validateButton_clicked();
+    void on_submitLogin_clicked();
+    void handleLogin(QByteArray& data, QUrl& route);
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;
     QVector<tempFile> deletedFiles;
     Ui::MainWindow *ui;
+    user currentUser;
     QString connectionState;
     QNetworkAccessManager* netManager = new QNetworkAccessManager(this);
     QString PORT;

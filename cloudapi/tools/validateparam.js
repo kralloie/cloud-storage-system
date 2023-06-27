@@ -18,7 +18,6 @@ function validatePort(portParam,PORT)
                 }
             }
         }
-
         return 8080;
     }
 }

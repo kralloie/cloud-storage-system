@@ -86,6 +86,7 @@ textRouter.delete('/',(req,res) =>{
 })
 
 textRouter.patch('/',upload.single('file'),async (req,res) =>{
+    console.log(req.file.originalname);
     const targetFile = req.query.file;
     const fileBuffer = req.file.buffer;
     const [fileName,fileExt] = req.query.file.split('.');

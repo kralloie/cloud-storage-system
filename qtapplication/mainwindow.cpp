@@ -31,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         QApplication::setPalette(darkPalette);
     }
     ui->setupUi(this);
+    ui->passwordInput->setPlaceholderText("Password:");
+    ui->usernameInput->setPlaceholderText("Username:");
+    ui->stackedWidget->setCurrentIndex(1);
     ui->portInput->setPlaceholderText("Input PORT");
     ui->imagePreview->setContentsMargins(0,0,0,0);
     ui->portInput->setAlignment(Qt::AlignCenter);
@@ -286,7 +289,7 @@ void MainWindow::uploadFile(QByteArray& fileBuffer, QUrl& url)
     QNetworkRequest request(url);
     QHttpMultiPart* payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart payloadPart;
-    payloadPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"file\""));
+    payloadPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"file\"")); // NAME ES REQ.FILE.ORIGINALNAME Y FILENAME ES EL REQ.'FILE' :$.
     payloadPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     payloadPart.setBody(fileBuffer);
     payload->append(payloadPart);
@@ -526,3 +529,56 @@ void MainWindow::resizeEvent(QResizeEvent *event)
         sendGetRequest(targetUrl);
     }
 }
+
+void MainWindow::on_submitLogin_clicked()
+{
+    if(connectionState == "connected")
+    {
+        QUrl loginRoute = QUrl(QStringLiteral("http://localhost:%1/login").arg(PORT));
+        QRegularExpression loginRegex("^[A-Za-z0-9]*$");
+        QString username = ui->usernameInput->text();
+        QString password = ui->passwordInput->text();
+
+        QRegularExpressionMatch userMatch = loginRegex.match(username);
+        QRegularExpressionMatch passwordMatch = loginRegex.match(password);
+        if(!userMatch.hasMatch() || !passwordMatch.hasMatch())
+        {
+            QMessageBox::warning(this,"Invalid credentials","Empty fields and special characters are not allowed, please input correct credentials.");
+            return;
+        }
+        QJsonObject credentialJSON;
+        credentialJSON["username"] = username;
+        credentialJSON["password"] = password;
+        QJsonDocument credentialDocument(credentialJSON);
+        QByteArray credentialsData = credentialDocument.toJson();
+        handleLogin(credentialsData,loginRoute);
+        return;
+    }
+
+    QMessageBox::warning(this,"Disconnected","Please select the correct port to connect to the server and then log in.");
+}
+
+void MainWindow::handleLogin(QByteArray& data, QUrl& route)
+{
+    QNetworkRequest request(route);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    QNetworkReply* reply = netManager->post(request,data);
+    connect(reply,&QNetworkReply::finished,this,[this,reply]() -> void {
+        QByteArray JSONResponse = reply->readAll();
+        QJsonDocument responseDocument = QJsonDocument::fromJson(JSONResponse);
+        QJsonObject responseObject = responseDocument.object();
+        QString statusMessage = responseObject["statusMessage"].toString();
+        qint16 statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if(statusCode == 200)
+        {
+            ui->stackedWidget->setCurrentIndex(0);
+            QMessageBox::information(this,"Success",statusMessage);
+            currentUser.isAdmin = responseDocument["isAdmin"].toBool();
+            currentUser.userId = responseDocument["userId"].toInt();
+            currentUser.username = responseDocument["username"].toString();
+            return;
+        }
+        QMessageBox::warning(this,"Failed",statusMessage);
+    });
+}
+
