@@ -5,14 +5,15 @@ const path = require('path')
 const multer = require('multer')
 
 const imagesRouter = express.Router();
-const imageStorageDir = path.join(path.dirname(__filename),'../storage/images/')
+const storageDir = path.join(path.dirname(__filename),'../storage/')
 const upload = multer();
 
 imagesRouter.get('/',(req,res) =>{
     const file = req.query.file;
-    const fileDir = path.join(imageStorageDir,file);
+    const username = req.query.username
+    const fileDir = path.join(storageDir,`${username}/images/${file}`);
     const fileExt = path.extname(file);
-    fs.readdir(imageStorageDir, (err,files) =>{
+    fs.readdir(path.join(storageDir,`${username}/images/`), (err,files) =>{
         if(files.includes(file)){
             fs.readFile(fileDir,(err,data) =>{
                 if(err)
@@ -37,17 +38,18 @@ imagesRouter.get('/',(req,res) =>{
 imagesRouter.post('/', upload.single('file'),(req,res) =>{
     console.log('Post request received');
     var fileName = req.query.file;
+    const username = req.query.username;
     const [fName,fExt] = fileName.split('.');
     const fileBuffer = req.file.buffer;
     var duplicatedNum = 0;
-    fs.readdir(imageStorageDir,(err,files) =>{
+    fs.readdir(path.join(storageDir,`${username}/images/`),(err,files) =>{
         while(files.includes(fileName))
         {
             duplicatedNum++;
             fileName = `${fName}(${duplicatedNum}).${fExt}`;
         }
 
-        const saveDir = path.join(imageStorageDir,fileName);
+        const saveDir = path.join(storageDir,`${username}/images/${fileName}`);
         fs.writeFile(saveDir, fileBuffer, (err) =>{
             if(err)
             {
@@ -61,9 +63,10 @@ imagesRouter.post('/', upload.single('file'),(req,res) =>{
 })
 
 imagesRouter.delete('/',(req,res) =>{
-    const file = req.query.file
-    fs.readdir(imageStorageDir, (err,files) =>{              
-        fs.unlink(path.join(imageStorageDir,file), err =>{
+    const file = req.query.file;
+    const username = req.query.username;
+    fs.readdir(path.join(storageDir,`${username}/images`), (err,files) =>{              
+        fs.unlink(path.join(storageDir,`${username}/images/${file}`), err =>{
             if(err)
             {
                 console.log('couldnt delete');

@@ -33,16 +33,21 @@ loginRouter.post('/',async (req,res) =>{
     })
     if(!matchArray)
     {
-        res.status(504).json({
+        res.status(504)
+        .json({
             "statusMessage":"Incorrect username or password.",
         });
     }
-    else res.status(200).json({
-        "username":matchArray.username,
-        "isAdmin":matchArray.adminPrivileges,
-        "userId":matchArray.id,
-        "statusMessage":"Logged in successfully",
-    });
+    else 
+    {
+        res.status(200)
+        .json({
+            "username":matchArray.username,
+            "isAdmin":matchArray.adminPrivileges,
+            "userId":matchArray.id,
+            "statusMessage":"Logged in successfully",
+        });
+    }
 })
 
 module.exports.loginRouter = loginRouter;

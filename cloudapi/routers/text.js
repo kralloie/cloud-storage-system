@@ -6,14 +6,13 @@ const multer = require('multer')
 const { typemap } = require('../tools/typehandlermap');
 
 const textRouter = express.Router();
-const textStorageDir = path.join(path.dirname(__filename),'../storage/texts/')
+const storageDir = path.join(path.dirname(__filename),'../storage/')
 const upload = multer();
 
 textRouter.get('/',(req,res) =>{
     const file = req.query.file;
+    const username = req.query.username;
     const fileExt = path.extname(file);
-    var byteAmount = 0;
-    var checksum;
 
     if(fileExt == "")
     {
@@ -24,8 +23,8 @@ textRouter.get('/',(req,res) =>{
         fileType = fileExt;
     }
 
-    const fileDir = path.join(textStorageDir,file);
-    fs.readdir(textStorageDir, (err,files) =>{
+    const fileDir = path.join(storageDir,`${username}/texts/${file}`);
+    fs.readdir(path.join(storageDir,`${username}/texts/`), (err,files) =>{
         if(files.includes(file)){
             fs.readFile(fileDir,(err,data) =>{
                 if(err)
@@ -45,18 +44,19 @@ textRouter.get('/',(req,res) =>{
 textRouter.post('/', upload.single('file'),(req,res) =>{
     console.log('Post request received');
     var fileName = req.query.file;
+    const username = req.query.username;
     const[fName, fExt] = fileName.split('.'); 
 
     const fileBuffer = req.file.buffer;
     var duplicatedNum = 0;
-    fs.readdir(textStorageDir,(err,files) =>{
+    fs.readdir(path.join(storageDir,`${username}/texts/`),(err,files) =>{
         while(files.includes(fileName))
         {
             duplicatedNum++;
             fileName = `${fName}(${duplicatedNum}).${fExt}`;
         }
 
-        const saveDir = path.join(textStorageDir,fileName);
+        const saveDir = path.join(storageDir,`${username}/texts/${fileName}`);
         fs.writeFile(saveDir, fileBuffer, (err) =>{
             if(err)
             {
@@ -71,7 +71,8 @@ textRouter.post('/', upload.single('file'),(req,res) =>{
 
 textRouter.delete('/',(req,res) =>{
     const file = req.query.file;
-    const targetDir = path.join(textStorageDir, file);
+    const username = req.query.username;
+    const targetDir = path.join(storageDir,`${username}/texts/${file}`);
   
     fs.unlink(targetDir, err =>{
         if(err)
@@ -89,11 +90,13 @@ textRouter.patch('/',upload.single('file'),async (req,res) =>{
     console.log(req.file.originalname);
     const targetFile = req.query.file;
     const fileBuffer = req.file.buffer;
+    const username = req.query.username;
     const [fileName,fileExt] = req.query.file.split('.');
     const fileType = mime.lookup(fileExt);
     let fileString = await typemap.get(fileType)(fileBuffer);
+    const targetDir = path.join(storageDir,`${username}/texts`)
 
-    fs.readdir(textStorageDir,(err,files) =>{
+    fs.readdir(path.join(storageDir,`${username}/texts/`),(err,files) =>{
         
         if(err)
         {
@@ -102,7 +105,7 @@ textRouter.patch('/',upload.single('file'),async (req,res) =>{
 
         if(files.includes(targetFile))
         {
-            fs.writeFile(path.join(textStorageDir,targetFile), fileString, (err) =>{
+            fs.writeFile(path.join(targetDir,targetFile), fileString, (err) =>{
                 if(err)
                 {
                     res.status(500)

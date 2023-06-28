@@ -33,6 +33,12 @@ app.post('/', upload.single('file'),(req,res) =>{
 })
 
 app.get('/',(req,res) =>{
+    res.status(200)
+    .setHeader("Connection-state","connected")
+    .end();
+})
+
+app.get('/global',(req,res) =>{
     console.log('get request'); //debug
     try
     {
@@ -60,6 +66,33 @@ app.get('/',(req,res) =>{
     }
 })
 
+app.get('/user',(req,res) =>{
+    console.log("user get");
+    const username = req.query.username;
+    let userStorageImages;
+    let userStorageTexts;
+
+    try
+    {
+        userStorageImages = fs.readdirSync(path.join(path.dirname(__filename),`./storage/${username}/images`));
+        userStorageTexts = fs.readdirSync(path.join(path.dirname(__filename),`./storage/${username}/texts`));
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(504)
+        .send("Server error");
+    }
+    const storageJSON = {
+        "images": userStorageImages,
+        "texts": userStorageTexts
+    }
+
+    console.log(storageJSON);
+    console.log(username);
+    res.status(200)
+    .json(storageJSON);
+})
 
 app.listen(PORT, () =>{
     console.log(`Listening on port: ${PORT}`);

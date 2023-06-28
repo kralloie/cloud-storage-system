@@ -53,7 +53,12 @@ void MainWindow::updateStorage()
     QNetworkRequest request;
     MainWindow::textList = {};
     MainWindow::imagesList = {};
-    request.setUrl(QUrl(QStringLiteral("http://localhost:%1").arg(PORT)));
+    QUrl targetUrl = QUrl(QStringLiteral("http://localhost:%1/user").arg(PORT));
+    QUrlQuery userQuery;
+    userQuery.addQueryItem("username",currentUser.username);
+    targetUrl.setQuery(userQuery);
+    request.setUrl(targetUrl);
+
     QNetworkReply *reply = netManager->get(request);
 
     QEventLoop eventLoop;
@@ -61,38 +66,6 @@ void MainWindow::updateStorage()
     eventLoop.exec();
 
     QByteArray JsonData = reply->readAll();
-    QString stateHeader = reply->rawHeader("Connection-State");
-    if(stateHeader.isEmpty())
-    {
-        QMessageBox::warning(this,"Unable to connect","Unable to connect to the cloud, please check if the PORT is correct and if the server is on.");
-        setImagePreview(nullptr);
-        ui->responseDisplay->setPlainText(nullptr);
-        selectedFile = "";
-        selectedFileType = "";
-        connectionState = "disconnected";
-        ui->stateLabel->setText("Disconnected");
-        ui->stateLabel->setStyleSheet(
-                "background-color:rgb(36, 31, 49);"
-                "border-style:outset;"
-                "border-width:2px;"
-                "border-color:rgb(34, 22, 37);"
-                "color:rgb(165, 29, 45);"
-        );
-        return;
-    }
-    else
-    {
-        connectionState = stateHeader;
-        ui->stateLabel->setText("Connected");
-        ui->stateLabel->setStyleSheet(
-              "background-color:rgb(36, 31, 49);"
-              "border-style:outset;"
-              "border-width:2px;"
-              "border-color:rgb(34, 22, 37);"
-              "color: rgb(38, 162, 105);"
-        );
-    }
-
     QJsonDocument responseJSON = QJsonDocument::fromJson(JsonData);
     QJsonObject responseObject = responseJSON.object();
     QJsonValue images = responseObject.value("images");
@@ -194,6 +167,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
         QUrl targetUrl = QUrl(QStringLiteral("%1/texts").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",itemString);
+        targetQuery.addQueryItem("username",currentUser.username);
         targetUrl.setQuery(targetQuery);
         selectedFile = itemString;
         selectedFileType = "texts";
@@ -204,6 +178,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
         QUrl targetUrl = QUrl(QStringLiteral("%1/images").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",itemString);
+        targetQuery.addQueryItem("username",currentUser.username);
         targetUrl.setQuery(targetQuery);
         selectedFile = itemString;
         selectedFileType = "images";
@@ -269,6 +244,7 @@ void MainWindow::on_updateTextFile_clicked()
         QUrl targetUrl = QUrl(QStringLiteral("%1/texts").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",selectedFile);
+        targetQuery.addQueryItem("username",currentUser.username);
         targetUrl.setQuery(targetQuery);
         QString data = ui->responseDisplay->toPlainText();
         QByteArray payloadData = data.toUtf8();
@@ -318,7 +294,6 @@ void MainWindow::on_uploadButton_clicked()
     QString filePath = QFileDialog::getOpenFileName(this,"Open File");
     QFileInfo fileInfo(filePath);
     QString fileName = fileInfo.fileName();
-    QString queryParam = QStringLiteral("?file=%1").arg(fileName);
     QString fileExtension = fileInfo.suffix();
     QString storagePath;
 
@@ -331,7 +306,7 @@ void MainWindow::on_uploadButton_clicked()
         storagePath = "texts";
     }
 
-    QString fileUrl = QStringLiteral("%1/%2/%3").arg(baseUrl.toString(),storagePath,queryParam);
+    QString fileUrl = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),storagePath,fileName,currentUser.username);
     QUrl url = QUrl(fileUrl);
     QFile targetFile(filePath);
     if(targetFile.open(QIODevice::ReadOnly))
@@ -365,7 +340,7 @@ void MainWindow::on_deleteButton_clicked()
     if(selectedFile != "")
     {
         QString targetFile = selectedFile;
-        QUrl url = QStringLiteral("%1/%2?file=%3").arg(baseUrl.toString(),selectedFileType,targetFile);
+        QUrl url = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),selectedFileType,targetFile,currentUser.username);
         QNetworkRequest tempRequest(url);
         QNetworkReply* tempReply = netManager->get(tempRequest);
         connect(tempReply,&QNetworkReply::finished,[this,url,tempReply]() -> void {
@@ -422,7 +397,7 @@ void MainWindow::on_undoButton_clicked()
     if(deletedFiles.size() > 0)
     {
         tempFile recoveredFile = deletedFiles.at(0);
-        QUrl recoveredFileUrl = QStringLiteral("%1/%2?file=%3").arg(baseUrl.toString(),recoveredFile.fileType,recoveredFile.fileName);
+        QUrl recoveredFileUrl = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),recoveredFile.fileType,recoveredFile.fileName,currentUser.username);
         uploadFile(recoveredFile.data,recoveredFileUrl);
         deletedFiles.remove(0);
     }
@@ -445,7 +420,7 @@ void MainWindow::on_downloadButton_clicked()
     {
         QString filename = selectedFile;
         QNetworkRequest request;
-        QUrl targetUrl = QStringLiteral("%1/%2?file=%3").arg(baseUrl.toString(),selectedFileType,selectedFile);
+        QUrl targetUrl = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),selectedFileType,selectedFile,currentUser.username);
         request.setUrl(targetUrl);
         QString targetPath = QFileDialog::getExistingDirectory(this, "Select directory to save the file", QDir::homePath());
 
@@ -513,7 +488,47 @@ void MainWindow::on_validateButton_clicked()
 
     PORT = portString;
     baseUrl = QUrl(QStringLiteral("http://localhost:%1").arg(PORT));
-    updateStorage();
+    QNetworkRequest request(baseUrl);
+    QNetworkReply* reply = netManager->get(request);
+
+    connect(reply,&QNetworkReply::finished,this,[this,reply]() ->void{
+        validateConnection(reply);
+    });
+}
+
+void MainWindow::validateConnection(QNetworkReply* reply)
+{
+    QString stateHeader = reply->rawHeader("Connection-state");
+    if(stateHeader.isEmpty())
+    {
+        QMessageBox::warning(this,"Unable to connect","Unable to connect to the cloud, please check if the PORT is correct and if the server is on.");
+        setImagePreview(nullptr);
+        ui->responseDisplay->setPlainText(nullptr);
+        selectedFile = "";
+        selectedFileType = "";
+        connectionState = "disconnected";
+        ui->stateLabel->setText("Disconnected");
+        ui->stateLabel->setStyleSheet(
+                "background-color:rgb(36, 31, 49);"
+                "border-style:outset;"
+                "border-width:2px;"
+                "border-color:rgb(34, 22, 37);"
+                "color:rgb(165, 29, 45);"
+        );
+        return;
+    }
+    else
+    {
+        connectionState = stateHeader;
+        ui->stateLabel->setText("Connected");
+        ui->stateLabel->setStyleSheet(
+              "background-color:rgb(36, 31, 49);"
+              "border-style:outset;"
+              "border-width:2px;"
+              "border-color:rgb(34, 22, 37);"
+              "color: rgb(38, 162, 105);"
+        );
+    }
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -576,6 +591,7 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
             currentUser.isAdmin = responseDocument["isAdmin"].toBool();
             currentUser.userId = responseDocument["userId"].toInt();
             currentUser.username = responseDocument["username"].toString();
+            updateStorage();
             return;
         }
         QMessageBox::warning(this,"Failed",statusMessage);

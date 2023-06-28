@@ -91,6 +91,7 @@ private slots:
     void on_validateButton_clicked();
     void on_submitLogin_clicked();
     void handleLogin(QByteArray& data, QUrl& route);
+    void validateConnection(QNetworkReply* reply);
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;

@@ -3,4 +3,4 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 js_file="$script_dir/../cloudapi/server.js"
 port_value=$(jq -r '.PORT' "$script_dir/../cloudapi/config/serverconfig.json")
 
-curl -X GET http://localhost:$port_value | jq
+curl -X GET http://localhost:$port_value/global | jq
