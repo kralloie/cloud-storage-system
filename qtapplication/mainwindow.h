@@ -102,6 +102,8 @@ private slots:
     void validateConnection(QNetworkReply* reply);
     void on_adminPanelButton_clicked();
     void on_mainPanelButton_clicked();
+    void on_loginReturn_clicked();
+    void on_registerAccount_clicked();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;

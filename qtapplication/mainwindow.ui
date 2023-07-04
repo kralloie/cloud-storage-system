@@ -28,8 +28,8 @@
     <property name="sizeConstraint">
      <enum>QLayout::SetMinAndMaxSize</enum>
     </property>
-    <item row="1" column="1">
-     <spacer name="horizontalSpacer_3">
+    <item row="2" column="0">
+     <spacer name="horizontalSpacer_2">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -41,8 +41,8 @@
       </property>
      </spacer>
     </item>
-    <item row="1" column="0">
-     <spacer name="horizontalSpacer_2">
+    <item row="2" column="1">
+     <spacer name="horizontalSpacer_3">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -56,8 +56,14 @@
     </item>
     <item row="0" column="0" colspan="3">
      <widget class="QStackedWidget" name="stackedWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="mainPage">
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
@@ -218,16 +224,16 @@ border-color:rgb(34, 22, 37);
        </layout>
       </widget>
       <widget class="QWidget" name="loginPage">
-       <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0" columnminimumwidth="0,0,0,0">
-        <item row="0" column="1">
-         <spacer name="verticalSpacer">
+       <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0" columnminimumwidth="0,1,1,0">
+        <item row="11" column="3">
+         <spacer name="horizontalSpacer_6">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>20</width>
-            <height>40</height>
+            <width>285</width>
+            <height>20</height>
            </size>
           </property>
          </spacer>
@@ -245,8 +251,8 @@ border-color:rgb(34, 22, 37);
           </property>
          </spacer>
         </item>
-        <item row="13" column="1">
-         <spacer name="verticalSpacer_2">
+        <item row="0" column="2">
+         <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -258,15 +264,15 @@ border-color:rgb(34, 22, 37);
           </property>
          </spacer>
         </item>
-        <item row="11" column="3">
-         <spacer name="horizontalSpacer_6">
+        <item row="12" column="2">
+         <spacer name="verticalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>285</width>
-            <height>20</height>
+            <width>20</width>
+            <height>40</height>
            </size>
           </property>
          </spacer>
@@ -286,8 +292,69 @@ border-color:rgb(34, 22, 37);</string>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,1,0">
-           <item row="2" column="0">
+          <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0">
+           <item row="5" column="1">
+            <widget class="QLineEdit" name="passwordInput">
+             <property name="styleSheet">
+              <string notr="true">background-color:rgb(61, 56, 70)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QPushButton" name="registerAccount">
+             <property name="text">
+              <string>Register</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="Line" name="line_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLineEdit" name="usernameInput">
+             <property name="styleSheet">
+              <string notr="true">background-color:rgb(61, 56, 70)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="loginLabel">
+             <property name="styleSheet">
+              <string notr="true">font: 200 11pt &quot;Cascadia Code&quot;;</string>
+             </property>
+             <property name="text">
+              <string>Log In</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QPushButton" name="submitLogin">
+             <property name="cursor">
+              <cursorShape>OpenHandCursor</cursorShape>
+             </property>
+             <property name="text">
+              <string>Log in</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="0">
             <spacer name="horizontalSpacer_8">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -300,10 +367,32 @@ border-color:rgb(34, 22, 37);</string>
              </property>
             </spacer>
            </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="portInput">
-             <property name="styleSheet">
-              <string notr="true">background-color:rgb(61, 56, 70)</string>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QFrame" name="frame_2">
+          <property name="styleSheet">
+           <string notr="true">background-color:rgb(61, 43, 68);
+border-radius: 5px;
+border-style:outset;
+border-width:2px;
+border-color:rgb(34, 22, 37);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="2" column="1">
+            <widget class="QPushButton" name="validateButton">
+             <property name="cursor">
+              <cursorShape>OpenHandCursor</cursorShape>
+             </property>
+             <property name="text">
+              <string>Validate Port</string>
              </property>
             </widget>
            </item>
@@ -327,49 +416,28 @@ color:rgb(165, 29, 45);</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QPushButton" name="validateButton">
-             <property name="cursor">
-              <cursorShape>OpenHandCursor</cursorShape>
-             </property>
-             <property name="text">
-              <string>Validate Port</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QLineEdit" name="usernameInput">
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="portInput">
              <property name="styleSheet">
               <string notr="true">background-color:rgb(61, 56, 70)</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="Line" name="line">
+           <item row="1" column="0">
+            <spacer name="horizontalSpacer_13">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QLineEdit" name="passwordInput">
-             <property name="styleSheet">
-              <string notr="true">background-color:rgb(61, 56, 70)</string>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
              </property>
-            </widget>
+            </spacer>
            </item>
-           <item row="6" column="1">
-            <widget class="QPushButton" name="submitLogin">
-             <property name="cursor">
-              <cursorShape>OpenHandCursor</cursorShape>
-             </property>
-             <property name="text">
-              <string>Log in</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <spacer name="horizontalSpacer_9">
+           <item row="1" column="2">
+            <spacer name="horizontalSpacer_14">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -387,10 +455,10 @@ color:rgb(165, 29, 45);</string>
        </layout>
       </widget>
       <widget class="QWidget" name="adminPage">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <layout class="QGridLayout" name="adminLayout" rowstretch="0,0" columnstretch="0,1,1" columnminimumwidth="0,0,0">
-          <item row="0" column="2">
+         <layout class="QGridLayout" name="adminLayout" rowstretch="0" columnstretch="0,0">
+          <item row="0" column="1">
            <widget class="QTableWidget" name="userCredentialsTable">
             <column>
              <property name="text">
@@ -414,26 +482,36 @@ color:rgb(165, 29, 45);</string>
             </column>
            </widget>
           </item>
-          <item row="0" column="1" rowspan="2" alignment="Qt::AlignTop">
-           <widget class="QFrame" name="createUserFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="mainPanelButton">
+            <property name="text">
+             <string>Main Panel</string>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>476</width>
-              <height>180</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>476</width>
-              <height>455</height>
-             </size>
-            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="registerPage">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="1">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="1">
+         <layout class="QGridLayout" name="registerLayout">
+          <item row="0" column="0">
+           <widget class="QFrame" name="frame">
             <property name="styleSheet">
              <string notr="true">background-color:rgb(61, 43, 68);
 border-radius: 5px;
@@ -447,98 +525,127 @@ border-color:rgb(34, 22, 37);</string>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QGridLayout" name="gridLayout_8">
-             <property name="sizeConstraint">
-              <enum>QLayout::SetDefaultConstraint</enum>
-             </property>
-             <item row="0" column="0">
-              <layout class="QGridLayout" name="createAccountLayout" rowstretch="0,0,0,0,0,0,0,1" columnstretch="0" rowminimumheight="0,0,0,0,0,0,0,0">
-               <property name="sizeConstraint">
-                <enum>QLayout::SetDefaultConstraint</enum>
+            <layout class="QGridLayout" name="gridLayout_6" columnstretch="0,0,0">
+             <item row="6" column="1">
+              <widget class="QLineEdit" name="regPassword">
+               <property name="styleSheet">
+                <string notr="true">background-color:rgb(61, 56, 70)</string>
                </property>
-               <item row="3" column="0">
-                <widget class="QLineEdit" name="createAccountUsername">
-                 <property name="styleSheet">
-                  <string notr="true">background-color:rgb(61, 56, 70)</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLineEdit" name="createAccountPassword">
-                 <property name="styleSheet">
-                  <string notr="true">background-color:rgb(61, 56, 70)</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QComboBox" name="adminPrivilegesBox">
-                 <property name="styleSheet">
-                  <string notr="true">text-align:center;</string>
-                 </property>
-                 <item>
-                  <property name="text">
-                   <string>True</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>False</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="Line" name="adminPrivilegesSeparator">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QPushButton" name="createAccountButton">
-                 <property name="cursor">
-                  <cursorShape>OpenHandCursor</cursorShape>
-                 </property>
-                 <property name="text">
-                  <string>Create</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignTop">
-                <widget class="QLabel" name="adminLabel">
-                 <property name="minimumSize">
-                  <size>
-                   <width>112</width>
-                   <height>18</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>112</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">border-style:none;</string>
-                 </property>
-                 <property name="text">
-                  <string>Admin Privileges</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLineEdit" name="regUsername">
+               <property name="styleSheet">
+                <string notr="true">background-color:rgb(61, 56, 70)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="registerLabel">
+               <property name="styleSheet">
+                <string notr="true">font: 200 11pt &quot;Cascadia Code&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Register </string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="QPushButton" name="loginReturn">
+               <property name="text">
+                <string>Back to Login</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="QPushButton" name="registerButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Register</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="Line" name="line_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="2">
+              <spacer name="horizontalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="5" column="0">
+              <spacer name="horizontalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="mainPanelButton">
-            <property name="text">
-             <string>Main Panel</string>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </item>
+        <item row="1" column="2">
+         <spacer name="horizontalSpacer_10">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>

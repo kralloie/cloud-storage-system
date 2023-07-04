@@ -30,19 +30,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         darkPalette.setColor(QPalette::WindowText, Qt::white);
         QApplication::setPalette(darkPalette);
     }
+
     ui->setupUi(this);
     ui->passwordInput->setPlaceholderText("Password:");
     ui->adminPanelButton->setEnabled(false);
     QHeaderView* headerView = ui->userCredentialsTable->horizontalHeader();
     headerView->setSectionResizeMode(QHeaderView::Stretch);
+    ui->regPassword->setPlaceholderText("Password:");
+    ui->regUsername->setPlaceholderText("Username:");
     ui->usernameInput->setPlaceholderText("Username:");
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->portInput->setPlaceholderText("Input PORT");
-    ui->createUserFrame->setFrameStyle(QFrame::NoFrame);
+    ui->stackedWidget->setCurrentIndex(4);
+    ui->portInput->setPlaceholderText("Input PORT:");
     ui->imagePreview->setContentsMargins(0,0,0,0);
-    ui->portInput->setAlignment(Qt::AlignCenter);
-    ui->createUserFrame->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
     ui->stateLabel->setAlignment(Qt::AlignCenter);
+    ui->registerLabel->setAlignment(Qt::AlignCenter);
+    ui->loginLabel->setAlignment(Qt::AlignCenter);
     ui->userCredentialsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->userCredentialsTable->verticalHeader()->setVisible(false);
     ui->portInput->setMaxLength(5);
@@ -606,13 +608,6 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
     });
 }
 
-
-void MainWindow::on_adminPanelButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(2);
-    setupCredentialsTable();
-}
-
 void MainWindow::setupCredentialsTable()
 {
     QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/admin").arg(PORT)));
@@ -638,10 +633,26 @@ void MainWindow::setupCredentialsTable()
     }
 }
 
-
+void MainWindow::on_adminPanelButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(2);
+    setupCredentialsTable();
+}
 
 void MainWindow::on_mainPanelButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
+}
+
+
+void MainWindow::on_loginReturn_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+
+void MainWindow::on_registerAccount_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(3);
 }
 
