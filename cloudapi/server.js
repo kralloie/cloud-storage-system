@@ -28,6 +28,15 @@ app.use('/images',imagesRouter);
 app.use('/texts',textRouter);
 app.use('/login',loginRouter);
 
+const dbconnection = mysql.createConnection({
+    "user":'admin',
+    "host":'localhost',
+    "password":'adminpass',
+    "database":'cloudservicedb'
+})
+
+dbconnection.connect();
+
 app.post('/', upload.single('file'),(req,res) =>{
     res.status(400).send('Please specify the type of file you are trying to upload in the URL path. Example: /images, /texts \n')
 })
@@ -92,6 +101,16 @@ app.get('/user',(req,res) =>{
     console.log(username);
     res.status(200)
     .json(storageJSON);
+})
+
+app.get('/admin',async (req,res) =>{
+    const userCredentialsTable = await new Promise((resolve,reject) =>{
+        dbconnection.query('SELECT * FROM userCredentials',(err,rows) =>{
+            resolve(rows);
+        })
+    })
+    res.status(200)
+    .json(userCredentialsTable);
 })
 
 app.listen(PORT, () =>{

@@ -40,10 +40,12 @@ loginRouter.post('/',async (req,res) =>{
     }
     else 
     {
+        var isAdminVal = (matchArray.adminPrivileges) ? true : false;
+        console.log(matchArray);
         res.status(200)
         .json({
             "username":matchArray.username,
-            "isAdmin":matchArray.adminPrivileges,
+            "isAdmin":isAdminVal,
             "userId":matchArray.id,
             "statusMessage":"Logged in successfully",
         });

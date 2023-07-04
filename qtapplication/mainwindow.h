@@ -8,9 +8,16 @@
 #include <QCryptographicHash>
 #include <QRegularExpressionMatch>
 #include <QTextStream>
+#include <QAbstractTableModel>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QTableView>
+#include <QHeaderView>
 #include <QRegularExpression>
 #include <QIODevice>
 #include <QNetworkRequest>
+#include <QAbstractItemModel>
+#include <QAbstractItemView>
 #include <QMessageBox>
 #include <QFile>
 #include <QImage>
@@ -82,6 +89,7 @@ private slots:
     void setImagePreview(const QByteArray& pixmapParam);
     void on_fileViewer_clicked(const QModelIndex &index);
     void handleTempStorage(QNetworkReply* reply,const QUrl& url);
+    void setupCredentialsTable();
     void on_updateTextFile_clicked();
     void on_uploadButton_clicked();
     void on_deleteButton_clicked();
@@ -92,6 +100,8 @@ private slots:
     void on_submitLogin_clicked();
     void handleLogin(QByteArray& data, QUrl& route);
     void validateConnection(QNetworkReply* reply);
+    void on_adminPanelButton_clicked();
+    void on_mainPanelButton_clicked();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;

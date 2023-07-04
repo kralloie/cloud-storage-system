@@ -32,12 +32,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
     ui->setupUi(this);
     ui->passwordInput->setPlaceholderText("Password:");
+    ui->adminPanelButton->setEnabled(false);
+    QHeaderView* headerView = ui->userCredentialsTable->horizontalHeader();
+    headerView->setSectionResizeMode(QHeaderView::Stretch);
     ui->usernameInput->setPlaceholderText("Username:");
     ui->stackedWidget->setCurrentIndex(1);
     ui->portInput->setPlaceholderText("Input PORT");
+    ui->createUserFrame->setFrameStyle(QFrame::NoFrame);
     ui->imagePreview->setContentsMargins(0,0,0,0);
     ui->portInput->setAlignment(Qt::AlignCenter);
+    ui->createUserFrame->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
     ui->stateLabel->setAlignment(Qt::AlignCenter);
+    ui->userCredentialsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->userCredentialsTable->verticalHeader()->setVisible(false);
     ui->portInput->setMaxLength(5);
     setWindowTitle("Storage Manager");
 }
@@ -58,6 +65,7 @@ void MainWindow::updateStorage()
     userQuery.addQueryItem("username",currentUser.username);
     targetUrl.setQuery(userQuery);
     request.setUrl(targetUrl);
+    ui->adminPanelButton->setEnabled(currentUser.isAdmin);
 
     QNetworkReply *reply = netManager->get(request);
 
@@ -596,5 +604,44 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
         }
         QMessageBox::warning(this,"Failed",statusMessage);
     });
+}
+
+
+void MainWindow::on_adminPanelButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(2);
+    setupCredentialsTable();
+}
+
+void MainWindow::setupCredentialsTable()
+{
+    QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/admin").arg(PORT)));
+    QNetworkReply* reply = netManager->get(request);
+    QEventLoop tableAwait;
+    connect(reply,&QNetworkReply::finished,&tableAwait,&QEventLoop::quit);
+    tableAwait.exec();
+    QByteArray replyData = reply->readAll();
+    QJsonDocument credentialsDocument = QJsonDocument::fromJson(replyData);
+    QJsonArray credentialsArray = credentialsDocument.array();
+    for(const QJsonValue& user : credentialsArray)
+    {
+        QJsonObject userObject = user.toObject();
+        QTableWidgetItem* username = new QTableWidgetItem(userObject["username"].toString());
+        QTableWidgetItem* password = new QTableWidgetItem(userObject["password"].toString());
+        QTableWidgetItem* isAdmin = new QTableWidgetItem(((userObject["adminPrivileges"].toInt() > 0) ? "True" : "False"));
+        QTableWidgetItem* id = new QTableWidgetItem(QString::number(userObject["id"].toInt()));
+        ui->userCredentialsTable->insertRow(ui->userCredentialsTable->rowCount());
+        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),0,id);
+        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),1,username);
+        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),2,password);
+        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),3,isAdmin);
+    }
+}
+
+
+
+void MainWindow::on_mainPanelButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
