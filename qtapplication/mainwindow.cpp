@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
 
     ui->setupUi(this);
+    wsserver->listen(QHostAddress("ws://localhost"),7777);
+    connect(wsserver,&QWebSocketServer::newConnection,this,&MainWindow::handleNewSocketConnection);
     ui->passwordInput->setPlaceholderText("Password:");
     ui->adminPanelButton->setEnabled(false);
     QHeaderView* headerView = ui->userCredentialsTable->horizontalHeader();
@@ -51,11 +53,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setWindowTitle("Storage Manager");
 }
 
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
 
 void MainWindow::updateStorage()
 {
@@ -94,6 +96,14 @@ void MainWindow::updateStorage()
     }
 
     updateFileViewer();
+}
+
+void MainWindow::handleNewSocketConnection()
+{
+    QWebSocket* socket = wsserver->nextPendingConnection();
+    connect(socket,&QWebSocket::textMessageReceived,this,[this](QString message) -> void{
+        qDebug() << message;
+    });
 }
 
 
@@ -555,22 +565,29 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     }
 }
 
+bool validateCredentials(QString& username, QString& password)
+{
+    QRegularExpression loginRegex("^[A-Za-z0-9]+$");
+    QRegularExpressionMatch usernameMatch = loginRegex.match(username);
+    QRegularExpressionMatch passwordMatch = loginRegex.match(password);
+    return (usernameMatch.hasMatch() && passwordMatch.hasMatch());
+}
+
 void MainWindow::on_submitLogin_clicked()
 {
     if(connectionState == "connected")
     {
         QUrl loginRoute = QUrl(QStringLiteral("http://localhost:%1/login").arg(PORT));
-        QRegularExpression loginRegex("^[A-Za-z0-9]*$");
         QString username = ui->usernameInput->text();
         QString password = ui->passwordInput->text();
+        bool validCredentials = validateCredentials(username,password);
 
-        QRegularExpressionMatch userMatch = loginRegex.match(username);
-        QRegularExpressionMatch passwordMatch = loginRegex.match(password);
-        if(!userMatch.hasMatch() || !passwordMatch.hasMatch())
+        if(!validCredentials)
         {
-            QMessageBox::warning(this,"Invalid credentials","Empty fields and special characters are not allowed, please input correct credentials.");
+            QMessageBox::warning(this,"Invalid credentials","Please don't use special characters neither leave empty fields on the form.");
             return;
         }
+
         QJsonObject credentialJSON;
         credentialJSON["username"] = username;
         credentialJSON["password"] = password;
@@ -601,6 +618,8 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
             currentUser.isAdmin = responseDocument["isAdmin"].toBool();
             currentUser.userId = responseDocument["userId"].toInt();
             currentUser.username = responseDocument["username"].toString();
+            currentUser.token = responseDocument["token"].toString();
+            qDebug() << currentUser.token;
             updateStorage();
             return;
         }
@@ -633,6 +652,42 @@ void MainWindow::setupCredentialsTable()
     }
 }
 
+void MainWindow::on_registerButton_clicked()
+{
+    if(connectionState == "connected")
+    {
+        QString username = ui->regUsername->text();
+        QString password = ui->regPassword->text();
+        bool validCredentials = validateCredentials(username,password);
+
+        if(!validCredentials)
+        {
+            QMessageBox::warning(this,"Invalid credentials","Please don't use special characters neither leave empty fields on the form.");
+            return;
+        }
+        QJsonObject credentialsJSON;
+        credentialsJSON["username"] = username;
+        credentialsJSON["password"] = password;
+        QJsonDocument credentialsDocument(credentialsJSON);
+        QByteArray credentialsData = credentialsDocument.toJson();
+        QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/register").arg(PORT)));
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        QNetworkReply* reply = netManager->post(request,credentialsData);
+        connect(reply,&QNetworkReply::finished,this,&MainWindow::handleRegister);
+        return;
+    }
+
+    QMessageBox::warning(this,"Disconnected","You are currently disconnected, please go back to the main panel and input the proper PORT.");
+}
+
+void MainWindow::handleRegister()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    QByteArray replyData = reply->readAll();
+    QString replyOutput = QString::fromUtf8(replyData);
+    QMessageBox::information(this,"",replyOutput);
+}
+
 void MainWindow::on_adminPanelButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(2);
@@ -655,4 +710,6 @@ void MainWindow::on_registerAccount_clicked()
 {
     ui->stackedWidget->setCurrentIndex(3);
 }
+
+
 

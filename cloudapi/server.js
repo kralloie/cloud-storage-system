@@ -10,6 +10,7 @@ const { imagesRouter } = require('./routers/images.js')
 const { textRouter } = require('./routers/text.js')
 const { loginRouter } = require('./routers/login.js');
 const { validatePort } = require('./tools/validateparam.js');
+const WebSocket = require('ws')
 
 var portParam = process.argv[2];
 var PORT = validatePort(portParam);
@@ -21,12 +22,23 @@ const configString = configBuffer.toString('utf-8');
 const configJSON = JSON.parse(configString);
 configJSON.PORT = PORT;
 fs.writeFileSync(configPath,JSON.stringify(configJSON));
-
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.json());
 app.use('/images',imagesRouter);
 app.use('/texts',textRouter);
 app.use('/login',loginRouter);
+
+let loggedUsers = [];
+
+const socket = new WebSocket("ws://localhost:7777");
+
+
+socket.on('open',() =>{
+    socket.send("HOLA");
+})
+
+
+let tokens = [];
 
 const dbconnection = mysql.createConnection({
     "user":'admin',
@@ -42,6 +54,7 @@ app.post('/', upload.single('file'),(req,res) =>{
 })
 
 app.get('/',(req,res) =>{
+    socket.send("Test");
     res.status(200)
     .setHeader("Connection-state","connected")
     .end();
@@ -109,12 +122,40 @@ app.get('/admin',async (req,res) =>{
             resolve(rows);
         })
     })
+    console.log(userCredentialsTable);
     res.status(200)
     .json(userCredentialsTable);
 })
+
+app.post('/register',(req,res) =>{
+    const requestJSON = req.body;
+    const username = requestJSON.username;
+    const password = requestJSON.password;
+    dbconnection.query(`INSERT INTO userCredentials(username,password) VALUES("${username}","${password}")`, (err) =>{
+        if(err)
+        {
+            res.status(505)
+            .send("Username already in use, please input a different one.");
+            return;
+        }
+        createUserStorage(username);
+        res.status(200)
+        .send("Account created successfully.");
+    })
+})
+
+function createUserStorage(username)
+{
+    fs.mkdir(`./storage/${username}`, (err) =>{
+        if (err) throw err;
+        fs.mkdir(`./storage/${username}/texts`, (err) => { if (err) throw err;});
+        fs.mkdir(`./storage/${username}/images`, (err) => { if (err) throw err});
+    })
+}
 
 app.listen(PORT, () =>{
     console.log(`Listening on port: ${PORT}`);
 })
 
 module.exports.PORT = PORT;
+module.exports.loggedUsers = loggedUsers;

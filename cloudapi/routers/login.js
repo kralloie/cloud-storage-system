@@ -4,6 +4,8 @@ const mime = require('mime-types')
 const path = require('path')
 const multer = require('multer')
 const mysql = require('mysql')
+const {v4: uuidv4 } = require('uuid');
+let { loggedUsers } = require('../server.js');
 
 const loginRouter = express.Router()
 const upload = multer();
@@ -40,6 +42,7 @@ loginRouter.post('/',async (req,res) =>{
     }
     else 
     {
+        let tokenuuid = uuidv4();
         var isAdminVal = (matchArray.adminPrivileges) ? true : false;
         console.log(matchArray);
         res.status(200)
@@ -48,6 +51,7 @@ loginRouter.post('/',async (req,res) =>{
             "isAdmin":isAdminVal,
             "userId":matchArray.id,
             "statusMessage":"Logged in successfully",
+            "token":tokenuuid
         });
     }
 })

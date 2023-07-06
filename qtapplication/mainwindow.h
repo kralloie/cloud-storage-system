@@ -41,6 +41,9 @@
 #include "QHttpMultiPart"
 #include "QHttpPart"
 #include "QFileDialog"
+#include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketServer>
+#include <QtWebSockets/qwebsocketserver.h>
 #include <QPair>
 
 
@@ -62,6 +65,7 @@ class user
         QString username;
         bool isAdmin;
         qint32 userId;
+        QString token;
 };
 
 class MainWindow : public QMainWindow
@@ -103,7 +107,10 @@ private slots:
     void on_adminPanelButton_clicked();
     void on_mainPanelButton_clicked();
     void on_loginReturn_clicked();
+    void on_registerButton_clicked();
     void on_registerAccount_clicked();
+    void handleNewSocketConnection();
+    void handleRegister();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;
@@ -114,6 +121,7 @@ private:
     QNetworkAccessManager* netManager = new QNetworkAccessManager(this);
     QString PORT;
     QMimeDatabase mimeDatabase;
+    QWebSocketServer* wsserver = new QWebSocketServer("wserver",QWebSocketServer::NonSecureMode,this);
     QString selectedFile;
     QString selectedFileType;
     QUrl baseUrl;
