@@ -64,9 +64,10 @@ void MainWindow::updateStorage()
     QNetworkRequest request;
     MainWindow::textList = {};
     MainWindow::imagesList = {};
-    QUrl targetUrl = QUrl(QStringLiteral("http://localhost:%1/user").arg(PORT));
+    QUrl targetUrl = QUrl(QStringLiteral("http://localhost:%1/user").arg(PORT,token));
     QUrlQuery userQuery;
     userQuery.addQueryItem("username",currentUser.username);
+    userQuery.addQueryItem("api",token);
     targetUrl.setQuery(userQuery);
     request.setUrl(targetUrl);
     ui->adminPanelButton->setEnabled(currentUser.isAdmin);
@@ -188,6 +189,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",itemString);
         targetQuery.addQueryItem("username",currentUser.username);
+        targetQuery.addQueryItem("api",token);
         targetUrl.setQuery(targetQuery);
         selectedFile = itemString;
         selectedFileType = "texts";
@@ -199,6 +201,7 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",itemString);
         targetQuery.addQueryItem("username",currentUser.username);
+        targetQuery.addQueryItem("api",token);
         targetUrl.setQuery(targetQuery);
         selectedFile = itemString;
         selectedFileType = "images";
@@ -265,6 +268,7 @@ void MainWindow::on_updateTextFile_clicked()
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",selectedFile);
         targetQuery.addQueryItem("username",currentUser.username);
+        targetQuery.addQueryItem("api",token);
         targetUrl.setQuery(targetQuery);
         QString data = ui->responseDisplay->toPlainText();
         QByteArray payloadData = data.toUtf8();
@@ -326,7 +330,7 @@ void MainWindow::on_uploadButton_clicked()
         storagePath = "texts";
     }
 
-    QString fileUrl = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),storagePath,fileName,currentUser.username);
+    QString fileUrl = QStringLiteral("%1/%2?file=%3&username=%4&api=%5").arg(baseUrl.toString(),storagePath,fileName,currentUser.username,token);
     QUrl url = QUrl(fileUrl);
     QFile targetFile(filePath);
     if(targetFile.open(QIODevice::ReadOnly))
@@ -360,7 +364,7 @@ void MainWindow::on_deleteButton_clicked()
     if(selectedFile != "")
     {
         QString targetFile = selectedFile;
-        QUrl url = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),selectedFileType,targetFile,currentUser.username);
+        QUrl url = QStringLiteral("%1/%2?file=%3&username=%4&api=%5").arg(baseUrl.toString(),selectedFileType,targetFile,currentUser.username,token);
         QNetworkRequest tempRequest(url);
         QNetworkReply* tempReply = netManager->get(tempRequest);
         connect(tempReply,&QNetworkReply::finished,[this,url,tempReply]() -> void {
@@ -417,7 +421,7 @@ void MainWindow::on_undoButton_clicked()
     if(deletedFiles.size() > 0)
     {
         tempFile recoveredFile = deletedFiles.at(0);
-        QUrl recoveredFileUrl = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),recoveredFile.fileType,recoveredFile.fileName,currentUser.username);
+        QUrl recoveredFileUrl = QStringLiteral("%1/%2?file=%3&username=%4&api=%5").arg(baseUrl.toString(),recoveredFile.fileType,recoveredFile.fileName,currentUser.username,token);
         uploadFile(recoveredFile.data,recoveredFileUrl);
         deletedFiles.remove(0);
     }
@@ -440,7 +444,7 @@ void MainWindow::on_downloadButton_clicked()
     {
         QString filename = selectedFile;
         QNetworkRequest request;
-        QUrl targetUrl = QStringLiteral("%1/%2?file=%3&username=%4").arg(baseUrl.toString(),selectedFileType,selectedFile,currentUser.username);
+        QUrl targetUrl = QStringLiteral("%1/%2?file=%3&username=%4&api=%5").arg(baseUrl.toString(),selectedFileType,selectedFile,currentUser.username,token);
         request.setUrl(targetUrl);
         QString targetPath = QFileDialog::getExistingDirectory(this, "Select directory to save the file", QDir::homePath());
 
@@ -608,8 +612,7 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
     connect(reply,&QNetworkReply::finished,this,[this,reply]() -> void {
         QByteArray JSONResponse = reply->readAll();
         QJsonDocument responseDocument = QJsonDocument::fromJson(JSONResponse);
-        QJsonObject responseObject = responseDocument.object();
-        QString statusMessage = responseObject["statusMessage"].toString();
+        QString statusMessage = responseDocument["statusMessage"].toString();
         qint16 statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         if(statusCode == 200)
         {
@@ -618,8 +621,7 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
             currentUser.isAdmin = responseDocument["isAdmin"].toBool();
             currentUser.userId = responseDocument["userId"].toInt();
             currentUser.username = responseDocument["username"].toString();
-            currentUser.token = responseDocument["token"].toString();
-            qDebug() << currentUser.token;
+            token = responseDocument["token"].toString();
             updateStorage();
             return;
         }

@@ -8,12 +8,13 @@ const process = require('node:process');
 const mysql = require('mysql')
 const { imagesRouter } = require('./routers/images.js')
 const { textRouter } = require('./routers/text.js')
-const { loginRouter } = require('./routers/login.js');
 const { validatePort } = require('./tools/validateparam.js');
-const WebSocket = require('ws')
+const { randomUUID } = require('crypto');
+let { tokens } = require('./token.js')
 
 var portParam = process.argv[2];
 var PORT = validatePort(portParam);
+
 const configPath = path.join(__dirname,'/config/serverconfig.json');
 const app = express();
 const upload = multer();
@@ -22,23 +23,11 @@ const configString = configBuffer.toString('utf-8');
 const configJSON = JSON.parse(configString);
 configJSON.PORT = PORT;
 fs.writeFileSync(configPath,JSON.stringify(configJSON));
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.json());
 app.use('/images',imagesRouter);
 app.use('/texts',textRouter);
-app.use('/login',loginRouter);
-
-let loggedUsers = [];
-
-const socket = new WebSocket("ws://localhost:7777");
-
-
-socket.on('open',() =>{
-    socket.send("HOLA");
-})
-
-
-let tokens = [];
 
 const dbconnection = mysql.createConnection({
     "user":'admin',
@@ -49,12 +38,7 @@ const dbconnection = mysql.createConnection({
 
 dbconnection.connect();
 
-app.post('/', upload.single('file'),(req,res) =>{
-    res.status(400).send('Please specify the type of file you are trying to upload in the URL path. Example: /images, /texts \n')
-})
-
 app.get('/',(req,res) =>{
-    socket.send("Test");
     res.status(200)
     .setHeader("Connection-state","connected")
     .end();
@@ -88,8 +72,53 @@ app.get('/global',(req,res) =>{
     }
 })
 
+app.post('/login',async (req,res) =>{
+    const JSONData = req.body;
+    let username = JSONData.username;
+    let password = JSONData.password;
+    console.log(username,password);
+    const matchArray = await new Promise((resolve,reject) =>{
+        dbconnection.query("SELECT * FROM userCredentials WHERE username = ? AND password = ?;",[username,password],(err,rows) =>{
+            if(err)
+            {
+                console.log(err);
+            }
+            resolve(rows[0]);
+        })
+    })
+    if(!matchArray)
+    {
+        res.status(504)
+        .json({
+            "statusMessage":"Incorrect username or password.",
+        });
+    }
+    else 
+    {
+        let tokenuuid = randomUUID();
+        tokens.push(tokenuuid);
+        var isAdminVal = (matchArray.adminPrivileges) ? true : false;
+        console.log(matchArray);
+        res.status(200)
+        .json({
+            "username":matchArray.username,
+            "isAdmin":isAdminVal,
+            "userId":matchArray.id,
+            "statusMessage":"Logged in successfully",
+            "token":tokenuuid
+        });
+    }
+})
+
 app.get('/user',(req,res) =>{
-    console.log("user get");
+    const token = req.query.api;
+    console.log(token);
+    if(!tokens.includes(token))
+    {
+        console.log("invalid token")
+        res.status(504)
+        .send("Invalid token")
+    }
     const username = req.query.username;
     let userStorageImages;
     let userStorageTexts;
@@ -105,13 +134,12 @@ app.get('/user',(req,res) =>{
         res.status(504)
         .send("Server error");
     }
+
     const storageJSON = {
         "images": userStorageImages,
         "texts": userStorageTexts
     }
 
-    console.log(storageJSON);
-    console.log(username);
     res.status(200)
     .json(storageJSON);
 })
@@ -158,4 +186,3 @@ app.listen(PORT, () =>{
 })
 
 module.exports.PORT = PORT;
-module.exports.loggedUsers = loggedUsers;

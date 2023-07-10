@@ -4,12 +4,19 @@ const mime = require('mime-types')
 const path = require('path')
 const multer = require('multer')
 const { typemap } = require('../tools/typehandlermap');
+let { tokens } = require('../token.js')
 
 const textRouter = express.Router();
 const storageDir = path.join(path.dirname(__filename),'../storage/')
 const upload = multer();
 
 textRouter.get('/',(req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     const file = req.query.file;
     const username = req.query.username;
     const fileExt = path.extname(file);
@@ -42,6 +49,12 @@ textRouter.get('/',(req,res) =>{
 })
 
 textRouter.post('/', upload.single('file'),(req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     console.log('Post request received');
     var fileName = req.query.file;
     const username = req.query.username;
@@ -70,6 +83,12 @@ textRouter.post('/', upload.single('file'),(req,res) =>{
 })
 
 textRouter.delete('/',(req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     const file = req.query.file;
     const username = req.query.username;
     const targetDir = path.join(storageDir,`${username}/texts/${file}`);
@@ -87,7 +106,12 @@ textRouter.delete('/',(req,res) =>{
 })
 
 textRouter.patch('/',upload.single('file'),async (req,res) =>{
-    console.log(req.file.originalname);
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     const targetFile = req.query.file;
     const fileBuffer = req.file.buffer;
     const username = req.query.username;

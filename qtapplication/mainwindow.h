@@ -65,7 +65,6 @@ class user
         QString username;
         bool isAdmin;
         qint32 userId;
-        QString token;
 };
 
 class MainWindow : public QMainWindow
@@ -120,12 +119,12 @@ private:
     QString connectionState;
     QNetworkAccessManager* netManager = new QNetworkAccessManager(this);
     QString PORT;
+    QString token;
     QMimeDatabase mimeDatabase;
     QWebSocketServer* wsserver = new QWebSocketServer("wserver",QWebSocketServer::NonSecureMode,this);
     QString selectedFile;
     QString selectedFileType;
     QUrl baseUrl;
-    QMap<QString,QList<QString>*> typeMap;
     QList<QString> imagesList;
     QList<QString> textList;
     QList<QString> imageExtensions = {"png","jpg","jpeg","webp","gif","raw"};

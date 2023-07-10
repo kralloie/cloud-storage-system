@@ -3,12 +3,19 @@ const fs = require('fs');
 const mime = require('mime-types')
 const path = require('path')
 const multer = require('multer')
+let { tokens } = require('../token.js')
 
 const imagesRouter = express.Router();
 const storageDir = path.join(path.dirname(__filename),'../storage/')
 const upload = multer();
 
 imagesRouter.get('/',(req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     const file = req.query.file;
     const username = req.query.username
     const fileDir = path.join(storageDir,`${username}/images/${file}`);
@@ -36,6 +43,12 @@ imagesRouter.get('/',(req,res) =>{
 })
 
 imagesRouter.post('/', upload.single('file'),(req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     console.log('Post request received');
     var fileName = req.query.file;
     const username = req.query.username;
@@ -63,6 +76,12 @@ imagesRouter.post('/', upload.single('file'),(req,res) =>{
 })
 
 imagesRouter.delete('/',(req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+    }
     const file = req.query.file;
     const username = req.query.username;
     fs.readdir(path.join(storageDir,`${username}/images`), (err,files) =>{              
