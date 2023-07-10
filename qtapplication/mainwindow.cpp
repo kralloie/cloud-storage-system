@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->regPassword->setPlaceholderText("Password:");
     ui->regUsername->setPlaceholderText("Username:");
     ui->usernameInput->setPlaceholderText("Username:");
+    ui->passwordInput->setEchoMode(QLineEdit::Password);
+    ui->regPassword->setEchoMode(QLineEdit::Password);
     ui->stackedWidget->setCurrentIndex(4);
     ui->portInput->setPlaceholderText("Input PORT:");
     ui->imagePreview->setContentsMargins(0,0,0,0);
@@ -57,6 +59,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+QString encryptPassword(QString password)
+{
+    QByteArray utfPass = password.toUtf8();
+    QByteArray hashedPass = QCryptographicHash::hash(utfPass,QCryptographicHash::Md5);
+    QString encryptedPassword = QString(hashedPass.toHex());
+    return encryptedPassword;
 }
 
 void MainWindow::updateStorage()
@@ -594,7 +604,7 @@ void MainWindow::on_submitLogin_clicked()
 
         QJsonObject credentialJSON;
         credentialJSON["username"] = username;
-        credentialJSON["password"] = password;
+        credentialJSON["password"] = encryptPassword(password);
         QJsonDocument credentialDocument(credentialJSON);
         QByteArray credentialsData = credentialDocument.toJson();
         handleLogin(credentialsData,loginRoute);
@@ -669,7 +679,7 @@ void MainWindow::on_registerButton_clicked()
         }
         QJsonObject credentialsJSON;
         credentialsJSON["username"] = username;
-        credentialsJSON["password"] = password;
+        credentialsJSON["password"] = encryptPassword(password);
         QJsonDocument credentialsDocument(credentialsJSON);
         QByteArray credentialsData = credentialsDocument.toJson();
         QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/register").arg(PORT)));
@@ -694,6 +704,55 @@ void MainWindow::on_adminPanelButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(2);
     setupCredentialsTable();
+    setupGlobalStorage();
+}
+
+void MainWindow::setupGlobalStorage()
+{
+   QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/global").arg(PORT)));
+   QNetworkReply* reply = netManager->get(request);
+   QEventLoop replyAwait;
+   connect(reply,&QNetworkReply::finished,&replyAwait,&QEventLoop::quit);
+   replyAwait.exec();
+
+   QStandardItemModel* itemModel = new QStandardItemModel(this);
+   QStandardItem* users = new QStandardItem("Users");
+
+   QByteArray replyData = reply->readAll();
+   QJsonDocument globalStorageDocument = QJsonDocument::fromJson(replyData);
+   QJsonObject globalStorageObject = globalStorageDocument.object();
+   QJsonValue usersValue = globalStorageObject.value("users");
+   QJsonArray usersArray = usersValue.toArray();
+   for(const QJsonValue& userVal : usersArray)
+   {
+       QJsonObject user = userVal.toObject();
+       QString username = user.value("user").toString();
+       QJsonValue images = user.value("images");
+       QJsonValue texts = user.value("texts");
+       QJsonArray imageArray = images.toArray();
+       QJsonArray textArray = texts.toArray();
+       QStandardItem* userItem = new QStandardItem(username);
+       QStandardItem* imagesItem = new QStandardItem("Images");
+       QStandardItem* textsItem = new QStandardItem("Texts");
+       for(const QJsonValue& image : imageArray)
+       {
+           QString fileName = image.toString();
+           QStandardItem* fileItem = new QStandardItem(fileName);
+           imagesItem->appendRow(fileItem);
+       }
+       for(const QJsonValue& text : textArray)
+       {
+           QString fileName = text.toString();
+           QStandardItem* fileItem = new QStandardItem(fileName);
+           textsItem->appendRow(fileItem);
+       }
+       userItem->appendRow(imagesItem);
+       userItem->appendRow(textsItem);
+       users->appendRow(userItem);
+   }
+    itemModel->appendRow(users);
+    itemModel->setHeaderData(0,Qt::Horizontal,"Global File Viewer");
+    ui->globalStorage->setModel(itemModel);
 }
 
 void MainWindow::on_mainPanelButton_clicked()

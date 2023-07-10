@@ -110,6 +110,7 @@ private slots:
     void on_registerAccount_clicked();
     void handleNewSocketConnection();
     void handleRegister();
+    void setupGlobalStorage();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;
