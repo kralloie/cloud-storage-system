@@ -1,3 +1,3 @@
-let tokens = [];
+let tokens = []
 
 module.exports.tokens = tokens;

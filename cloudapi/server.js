@@ -44,8 +44,26 @@ app.get('/',(req,res) =>{
     .end();
 })
 
+app.post('/logout',(req,res) =>{
+    console.log(tokens);
+    const queryToken = req.query.token;
+    if(!tokens.includes(queryToken))
+    {
+        res.status(504)
+        .end();
+        return;
+    }
+    const requestJSON = req.body;
+    const token = requestJSON.token;
+    const username = requestJSON.username;
+    const tokenIndex = tokens.indexOf(token);
+    tokens.splice(tokenIndex,1);
+    res.status(200)
+    .end();
+    console.log(tokens);
+})
+
 app.get('/global',(req,res) =>{
-    console.log('get request'); //debug
     try
     {
         const storageJSON = {
@@ -118,6 +136,7 @@ app.get('/user',(req,res) =>{
         console.log("invalid token")
         res.status(504)
         .send("Invalid token")
+        return;
     }
     const username = req.query.username;
     let userStorageImages;
@@ -178,6 +197,18 @@ function createUserStorage(username)
         if (err) throw err;
         fs.mkdir(`./storage/${username}/texts`, (err) => { if (err) throw err;});
         fs.mkdir(`./storage/${username}/images`, (err) => { if (err) throw err});
+    })
+}
+
+function insertLog(username,token,filename,action)
+{
+    if(!tokens.includes(token)) { return };
+    const currentDate = new Date();
+    const day = currentDate.toDateString();
+    const time = currentDate.toTimeString();
+    dbconnection.query(`INSERT INTO logs(action,hour,day,file,user) VALUES("${action}","${time}","${day}","${filename}","${username}")`, (err) =>{
+        if(err) {throw err};
+        console.log("Log created");
     })
 }
 

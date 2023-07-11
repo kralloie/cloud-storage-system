@@ -11,6 +11,9 @@
 #include <QAbstractTableModel>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QDate>
+#include <QDateTime>
+#include <QTime>
 #include <QTableView>
 #include <QHeaderView>
 #include <QRegularExpression>
@@ -111,6 +114,8 @@ private slots:
     void handleNewSocketConnection();
     void handleRegister();
     void setupGlobalStorage();
+    void handleLogout();
+    void on_logoutButton_clicked();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;

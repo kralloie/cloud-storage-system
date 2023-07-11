@@ -4,6 +4,7 @@ const mime = require('mime-types')
 const path = require('path')
 const multer = require('multer')
 let { tokens } = require('../token.js')
+const { insertLog } = require('../tools/loghandler.js');
 
 const imagesRouter = express.Router();
 const storageDir = path.join(path.dirname(__filename),'../storage/')
@@ -15,6 +16,7 @@ imagesRouter.get('/',(req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     const file = req.query.file;
     const username = req.query.username
@@ -27,7 +29,7 @@ imagesRouter.get('/',(req,res) =>{
                 {
                     throw err
                 }
-
+                insertLog(username,token,file,"download");
                 return res.status(200)
                 .contentType(mime.lookup(fileExt))
                 .setHeader('File-Type','image')
@@ -48,6 +50,7 @@ imagesRouter.post('/', upload.single('file'),(req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     console.log('Post request received');
     var fileName = req.query.file;
@@ -69,6 +72,7 @@ imagesRouter.post('/', upload.single('file'),(req,res) =>{
                return res.status(500)
                .send('Error while saving the file. \n');
             }
+            insertLog(username,token,fileName,"upload")
             return res.status(200)
             .send('File saved correctly \n');
         })
@@ -81,6 +85,7 @@ imagesRouter.delete('/',(req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     const file = req.query.file;
     const username = req.query.username;
@@ -92,7 +97,7 @@ imagesRouter.delete('/',(req,res) =>{
                 return res.status(500)
                 .send('Error while deleting the file. \n')
             }
-
+            insertLog(username,token,file,"delete")
             res.status(200)
             .send(`File deleted successfully \n`)
         })

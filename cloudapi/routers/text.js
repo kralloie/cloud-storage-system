@@ -5,6 +5,7 @@ const path = require('path')
 const multer = require('multer')
 const { typemap } = require('../tools/typehandlermap');
 let { tokens } = require('../token.js')
+const { insertLog } = require('../tools/loghandler');
 
 const textRouter = express.Router();
 const storageDir = path.join(path.dirname(__filename),'../storage/')
@@ -16,6 +17,7 @@ textRouter.get('/',(req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     const file = req.query.file;
     const username = req.query.username;
@@ -38,7 +40,7 @@ textRouter.get('/',(req,res) =>{
                 {
                     throw err
                 }
-
+                insertLog(username,token,file,"download");
                 return res.status(200)
                 .contentType(mime.lookup(fileType))
                 .setHeader('File-Type','text')
@@ -54,6 +56,7 @@ textRouter.post('/', upload.single('file'),(req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     console.log('Post request received');
     var fileName = req.query.file;
@@ -76,6 +79,7 @@ textRouter.post('/', upload.single('file'),(req,res) =>{
                return res.status(500)
                .send('Error while saving the file. \n');
             }
+            insertLog(username,token,fileName,"upload")
             return res.status(200)
             .send('File saved correctly \n');
         })
@@ -88,6 +92,7 @@ textRouter.delete('/',(req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     const file = req.query.file;
     const username = req.query.username;
@@ -99,10 +104,10 @@ textRouter.delete('/',(req,res) =>{
             return res.status(500)
             .send('Error while deleting the file. \n')
         }
-
+        insertLog(username,token,file,"delete");  
         res.status(200)
         .send(`File deleted successfully \n`)
-    })        
+    })      
 })
 
 textRouter.patch('/',upload.single('file'),async (req,res) =>{
@@ -111,6 +116,7 @@ textRouter.patch('/',upload.single('file'),async (req,res) =>{
     {
         res.status(504)
         .send("Invalid token")
+        return;
     }
     const targetFile = req.query.file;
     const fileBuffer = req.file.buffer;
@@ -135,6 +141,7 @@ textRouter.patch('/',upload.single('file'),async (req,res) =>{
                     res.status(500)
                     .send('Error while updating the file. \n');
                 }
+                insertLog(username,token,targetFile,"update");
                 res.status(200)
                 .send('File updated correctly. \n')
             })

@@ -63,12 +63,12 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="mainPage">
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
@@ -129,6 +129,13 @@
             </property>
             <property name="text">
              <string>Admin Panel</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="logoutButton">
+            <property name="text">
+             <string>Log Out</string>
             </property>
            </widget>
           </item>

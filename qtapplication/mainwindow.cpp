@@ -362,7 +362,6 @@ void MainWindow::sendDeleteRequest(const QUrl& url)
     selectedFileType = nullptr;
 }
 
-
 void MainWindow::on_deleteButton_clicked()
 {
     if(connectionState == "disconnected")
@@ -773,4 +772,23 @@ void MainWindow::on_registerAccount_clicked()
 }
 
 
+void MainWindow::on_logoutButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->passwordInput->setText("");
+    ui->usernameInput->setText("");
+    handleLogout();
+}
+
+void MainWindow::handleLogout()
+{
+    QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/logout").arg(PORT,token)));
+    QJsonObject logoutData;
+    logoutData["token"] = token;
+    logoutData["username"] = currentUser.username;
+    QJsonDocument logoutDocument(logoutData);
+    QByteArray logoutPayload = logoutDocument.toJson();
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    netManager->post(request,logoutPayload);
+}
 
