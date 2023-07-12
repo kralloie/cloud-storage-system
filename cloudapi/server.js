@@ -130,7 +130,6 @@ app.post('/login',async (req,res) =>{
 
 app.get('/user',(req,res) =>{
     const token = req.query.api;
-    console.log(token);
     if(!tokens.includes(token))
     {
         console.log("invalid token")
@@ -169,7 +168,6 @@ app.get('/admin',async (req,res) =>{
             resolve(rows);
         })
     })
-    console.log(userCredentialsTable);
     res.status(200)
     .json(userCredentialsTable);
 })
@@ -191,24 +189,31 @@ app.post('/register',(req,res) =>{
     })
 })
 
+app.get('/logs', async (req,res) =>{
+    const token = req.query.api;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+        return;
+    }
+
+    const logObject = await new Promise((resolve,reject) =>{
+        dbconnection.query("SELECT * FROM logs", (err,rows) =>{
+            if(err) { throw err };
+            resolve(rows);
+        })
+    })
+    res.status(200)
+    .json(logObject);
+})
+
 function createUserStorage(username)
 {
     fs.mkdir(`./storage/${username}`, (err) =>{
         if (err) throw err;
         fs.mkdir(`./storage/${username}/texts`, (err) => { if (err) throw err;});
         fs.mkdir(`./storage/${username}/images`, (err) => { if (err) throw err});
-    })
-}
-
-function insertLog(username,token,filename,action)
-{
-    if(!tokens.includes(token)) { return };
-    const currentDate = new Date();
-    const day = currentDate.toDateString();
-    const time = currentDate.toTimeString();
-    dbconnection.query(`INSERT INTO logs(action,hour,day,file,user) VALUES("${action}","${time}","${day}","${filename}","${username}")`, (err) =>{
-        if(err) {throw err};
-        console.log("Log created");
     })
 }
 

@@ -116,6 +116,7 @@ private slots:
     void setupGlobalStorage();
     void handleLogout();
     void on_logoutButton_clicked();
+    void setupLogsTable();
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;

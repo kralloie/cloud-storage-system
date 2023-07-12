@@ -36,8 +36,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(wsserver,&QWebSocketServer::newConnection,this,&MainWindow::handleNewSocketConnection);
     ui->passwordInput->setPlaceholderText("Password:");
     ui->adminPanelButton->setEnabled(false);
-    QHeaderView* headerView = ui->userCredentialsTable->horizontalHeader();
-    headerView->setSectionResizeMode(QHeaderView::Stretch);
+    QHeaderView* headerViewCredentials = ui->userCredentialsTable->horizontalHeader();
+    QHeaderView* headerViewLogs = ui->logsTable->horizontalHeader();
+    headerViewCredentials->setSectionResizeMode(QHeaderView::Stretch);
+    headerViewLogs->setSectionResizeMode(QHeaderView::Stretch);
     ui->regPassword->setPlaceholderText("Password:");
     ui->regUsername->setPlaceholderText("Username:");
     ui->usernameInput->setPlaceholderText("Username:");
@@ -49,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->stateLabel->setAlignment(Qt::AlignCenter);
     ui->registerLabel->setAlignment(Qt::AlignCenter);
     ui->loginLabel->setAlignment(Qt::AlignCenter);
+    ui->logsTable->verticalHeader()->setVisible(false);
+    ui->logsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->userCredentialsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->userCredentialsTable->verticalHeader()->setVisible(false);
     ui->portInput->setMaxLength(5);
@@ -640,6 +644,8 @@ void MainWindow::handleLogin(QByteArray& data, QUrl& route)
 
 void MainWindow::setupCredentialsTable()
 {
+    ui->userCredentialsTable->clearContents();
+    ui->userCredentialsTable->setRowCount(0);
     QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/admin").arg(PORT)));
     QNetworkReply* reply = netManager->get(request);
     QEventLoop tableAwait;
@@ -656,10 +662,46 @@ void MainWindow::setupCredentialsTable()
         QTableWidgetItem* isAdmin = new QTableWidgetItem(((userObject["adminPrivileges"].toInt() > 0) ? "True" : "False"));
         QTableWidgetItem* id = new QTableWidgetItem(QString::number(userObject["id"].toInt()));
         ui->userCredentialsTable->insertRow(ui->userCredentialsTable->rowCount());
-        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),0,id);
-        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),1,username);
-        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),2,password);
-        ui->userCredentialsTable->setItem((ui->userCredentialsTable->rowCount() - 1),3,isAdmin);
+        int currentRow = ui->userCredentialsTable->rowCount() - 1;
+        ui->userCredentialsTable->setItem(currentRow,0,id);
+        ui->userCredentialsTable->setItem(currentRow,1,username);
+        ui->userCredentialsTable->setItem(currentRow,2,password);
+        ui->userCredentialsTable->setItem(currentRow,3,isAdmin);
+    }
+}
+
+void MainWindow::setupLogsTable()
+{
+    ui->logsTable->clearContents();
+    ui->logsTable->setRowCount(0);
+    QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/logs?api=%2").arg(PORT,token)));
+    QNetworkReply* reply = netManager->get(request);
+    QEventLoop tableAwait;
+    connect(reply,&QNetworkReply::finished,&tableAwait,&QEventLoop::quit);
+    tableAwait.exec();
+    QByteArray tableData = reply->readAll();
+    QJsonDocument tableDocument = QJsonDocument::fromJson(tableData);
+    QJsonArray tableArray = tableDocument.array();
+    for(const QJsonValue& log : tableArray)
+    {
+        QJsonObject logObject = log.toObject();
+        QString rawDay = logObject["day"].toString();
+        QStringList daySplitted = rawDay.split("T");
+        QString dayString = daySplitted.at(0);
+        QTableWidgetItem* id = new QTableWidgetItem(QString::number(logObject["id"].toInt()));
+        QTableWidgetItem* action = new QTableWidgetItem(logObject["action"].toString());
+        QTableWidgetItem* hour = new QTableWidgetItem(logObject["hour"].toString());
+        QTableWidgetItem* day = new QTableWidgetItem(dayString);
+        QTableWidgetItem* file = new QTableWidgetItem(logObject["file"].toString());
+        QTableWidgetItem* user = new QTableWidgetItem(logObject["user"].toString());
+        ui->logsTable->insertRow(ui->logsTable->rowCount());
+        int currentRow = ui->logsTable->rowCount() - 1;
+        ui->logsTable->setItem(currentRow,0,id);
+        ui->logsTable->setItem(currentRow,1,action);
+        ui->logsTable->setItem(currentRow,2,hour);
+        ui->logsTable->setItem(currentRow,3,day);
+        ui->logsTable->setItem(currentRow,4,file);
+        ui->logsTable->setItem(currentRow,5,user);
     }
 }
 
@@ -704,6 +746,7 @@ void MainWindow::on_adminPanelButton_clicked()
     ui->stackedWidget->setCurrentIndex(2);
     setupCredentialsTable();
     setupGlobalStorage();
+    setupLogsTable();
 }
 
 void MainWindow::setupGlobalStorage()

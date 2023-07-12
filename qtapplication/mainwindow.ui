@@ -63,7 +63,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="mainPage">
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
@@ -467,7 +467,7 @@ color:rgb(165, 29, 45);</string>
       <widget class="QWidget" name="adminPage">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <layout class="QGridLayout" name="adminLayout" rowstretch="0" columnstretch="0,0,0">
+         <layout class="QGridLayout" name="adminLayout" rowstretch="0,0" columnstretch="0,0,0">
           <item row="0" column="1">
            <widget class="QTableWidget" name="userCredentialsTable">
             <property name="styleSheet">
@@ -507,7 +507,7 @@ border-color:rgb(34, 22, 37);</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="2" rowspan="2">
            <widget class="QTreeView" name="globalStorage">
             <property name="styleSheet">
              <string notr="true">font-size: 20px;
@@ -517,6 +517,48 @@ border-style:outset;
 border-width:2px;
 border-color:rgb(34, 22, 37);</string>
             </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QTableWidget" name="logsTable">
+            <property name="styleSheet">
+             <string notr="true">font-size: 12px;
+background-color: rgb(36, 31, 49);
+border-radius: 5px;
+border-style:outset;
+border-width:2px;
+border-color:rgb(34, 22, 37);</string>
+            </property>
+            <column>
+             <property name="text">
+              <string>ID</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Action</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Hour</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Day</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>File</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>User</string>
+             </property>
+            </column>
            </widget>
           </item>
          </layout>
