@@ -44,6 +44,41 @@ imagesRouter.get('/',(req,res) =>{
     })
 })
 
+imagesRouter.get('/admin',(req,res) =>{
+    const token = req.query.api;
+    const adminName = req.query.admin;
+    if(!tokens.includes(token))
+    {
+        res.status(504)
+        .send("Invalid token")
+        return;
+    }
+    const file = req.query.file;
+    const username = req.query.username
+    const fileDir = path.join(storageDir,`${username}/images/${file}`);
+    const fileExt = path.extname(file);
+    fs.readdir(path.join(storageDir,`${username}/images/`), (err,files) =>{
+        if(files.includes(file)){
+            fs.readFile(fileDir,(err,data) =>{
+                if(err)
+                {
+                    throw err
+                }
+                insertLog(adminName,token,file,"download");
+                return res.status(200)
+                .contentType(mime.lookup(fileExt))
+                .setHeader('File-Type','image')
+                .send(data);
+            });
+        } 
+        else 
+        { 
+            return res.status(404)
+            .send('File not found \n'); 
+        }
+    })
+})
+
 imagesRouter.post('/', upload.single('file'),(req,res) =>{
     const token = req.query.api;
     if(!tokens.includes(token))

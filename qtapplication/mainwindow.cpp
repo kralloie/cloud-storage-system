@@ -47,12 +47,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->regPassword->setEchoMode(QLineEdit::Password);
     ui->stackedWidget->setCurrentIndex(4);
     ui->portInput->setPlaceholderText("Input PORT:");
+    ui->globalImageDisplay->setContentsMargins(0,0,0,0);
     ui->imagePreview->setContentsMargins(0,0,0,0);
     ui->stateLabel->setAlignment(Qt::AlignCenter);
     ui->registerLabel->setAlignment(Qt::AlignCenter);
     ui->loginLabel->setAlignment(Qt::AlignCenter);
     ui->logsTable->verticalHeader()->setVisible(false);
     ui->logsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->globalStorage->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->userCredentialsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->userCredentialsTable->verticalHeader()->setVisible(false);
     ui->portInput->setMaxLength(5);
@@ -78,7 +80,7 @@ void MainWindow::updateStorage()
     QNetworkRequest request;
     MainWindow::textList = {};
     MainWindow::imagesList = {};
-    QUrl targetUrl = QUrl(QStringLiteral("http://localhost:%1/user").arg(PORT,token));
+    QUrl targetUrl = QUrl(QStringLiteral("http://localhost:%1/user").arg(PORT));
     QUrlQuery userQuery;
     userQuery.addQueryItem("username",currentUser.username);
     userQuery.addQueryItem("api",token);
@@ -149,11 +151,11 @@ void MainWindow::handleGetResponse(QNetworkReply* reply)
         {
             ui->responseDisplay->setPlainText(responseData);
         }
-        setImagePreview(nullptr);
+        setImagePreview(nullptr,ui->imagePreview);
     }
     else if(fileType == "image")
     {
-        setImagePreview(responseData);
+        setImagePreview(responseData,ui->imagePreview);
         ui->responseDisplay->setPlainText(nullptr);
     }
     else
@@ -227,13 +229,13 @@ void MainWindow::on_fileViewer_clicked(const QModelIndex &index)
     }
 }
 
-void MainWindow::setImagePreview(const QByteArray& pixmapParam)
+void MainWindow::setImagePreview(const QByteArray& pixmapParam, QLabel* displayWidget)
 {
     QPixmap pixmap;
     pixmap.loadFromData(pixmapParam);
-    QSize imageSize = ui->imagePreview->size();
+    QSize imageSize = displayWidget->size();
     QPixmap scaledPixmap = pixmap.scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    ui->imagePreview->setPixmap(scaledPixmap);
+    displayWidget->setPixmap(scaledPixmap);
 }
 
 
@@ -539,7 +541,7 @@ void MainWindow::validateConnection(QNetworkReply* reply)
     if(stateHeader.isEmpty())
     {
         QMessageBox::warning(this,"Unable to connect","Unable to connect to the cloud, please check if the PORT is correct and if the server is on.");
-        setImagePreview(nullptr);
+        setImagePreview(nullptr,ui->imagePreview);
         ui->responseDisplay->setPlainText(nullptr);
         selectedFile = "";
         selectedFileType = "";
@@ -571,14 +573,34 @@ void MainWindow::validateConnection(QNetworkReply* reply)
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    if(selectedFileType == "images")
+    if(selectedFileType.toLower() == "images")
     {
-        setImagePreview(nullptr);
+        setImagePreview(nullptr,ui->imagePreview);
         QUrl targetUrl = QUrl(QStringLiteral("%1/images").arg(baseUrl.toString()));
         QUrlQuery targetQuery;
         targetQuery.addQueryItem("file",selectedFile);
         targetUrl.setQuery(targetQuery);
         sendGetRequest(targetUrl);
+    }
+
+    if(adminSelectedFileType.toLower() == "images")
+    {
+        setImagePreview(nullptr,ui->globalImageDisplay);
+        QUrl url(QUrl(QStringLiteral("http://localhost:%1/images/admin").arg(PORT)));
+        QNetworkRequest request;
+        QUrlQuery urlQueries;
+        urlQueries.addQueryItem("file",adminSelectedFile);
+        urlQueries.addQueryItem("admin",currentUser.username);
+        urlQueries.addQueryItem("username",adminSelectedUser);
+        urlQueries.addQueryItem("api",token);
+        url.setQuery(urlQueries);
+        request.setUrl(url);
+        QNetworkReply* reply = netManager->get(request);
+        QEventLoop replyAwait;
+        connect(reply,&QNetworkReply::finished,&replyAwait,&QEventLoop::quit);
+        replyAwait.exec();
+        QByteArray fileData = reply->readAll();
+        setImagePreview(fileData,ui->globalImageDisplay);
     }
 }
 
@@ -800,6 +822,10 @@ void MainWindow::setupGlobalStorage()
 void MainWindow::on_mainPanelButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
+    setImagePreview(nullptr,ui->globalImageDisplay);
+    ui->globalTextEditor->setPlainText("");
+    adminSelectedFile = "";
+    adminSelectedFileType = "";
 }
 
 
@@ -825,7 +851,7 @@ void MainWindow::on_logoutButton_clicked()
 
 void MainWindow::handleLogout()
 {
-    QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/logout").arg(PORT,token)));
+    QNetworkRequest request(QUrl(QStringLiteral("http://localhost:%1/logout?api=%2").arg(PORT,token)));
     QJsonObject logoutData;
     logoutData["token"] = token;
     logoutData["username"] = currentUser.username;
@@ -834,4 +860,51 @@ void MainWindow::handleLogout()
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     netManager->post(request,logoutPayload);
 }
+
+
+void MainWindow::on_globalStorage_clicked(const QModelIndex &index)
+{
+    QStandardItemModel* modelPtr = qobject_cast<QStandardItemModel*>(ui->globalStorage->model());
+    QStandardItem* itemPtr = modelPtr->itemFromIndex(index);
+    QModelIndex fileTypeIndex = index.parent();
+    QModelIndex userIndex = fileTypeIndex.parent();
+    QStandardItem* fileTypeItem = modelPtr->itemFromIndex(fileTypeIndex);
+    QStandardItem* userItem = modelPtr->itemFromIndex(userIndex);
+    adminSelectedFile = itemPtr->text();
+    adminSelectedFileType = fileTypeItem->text();
+    adminSelectedUser = userItem->text();
+    QString targetUser = adminSelectedUser;
+    updateGlobalViewer(targetUser);
+}
+
+void MainWindow::updateGlobalViewer(QString& user)
+{
+    QString fileTypeRoute = adminSelectedFileType.toLower();
+    QNetworkRequest request;
+    QUrl url(QStringLiteral("http://localhost:%1/%2/admin").arg(PORT,fileTypeRoute));
+    QUrlQuery urlQueries;
+    urlQueries.addQueryItem("file",adminSelectedFile);
+    urlQueries.addQueryItem("username",user);
+    urlQueries.addQueryItem("admin",currentUser.username);
+    urlQueries.addQueryItem("api",token);
+    url.setQuery(urlQueries);
+    request.setUrl(url);
+    QNetworkReply* reply = netManager->get(request);
+    QEventLoop replyAwait;
+    connect(reply,&QNetworkReply::finished,&replyAwait,&QEventLoop::quit);
+    replyAwait.exec();
+    QByteArray fileData = reply->readAll();
+
+    if(fileTypeRoute == "images")
+    {
+        setImagePreview(fileData,ui->globalImageDisplay);
+        ui->globalTextEditor->setPlainText("");
+        return;
+    }
+
+    ui->globalTextEditor->setPlainText(QString::fromUtf8(fileData));
+    setImagePreview(nullptr,ui->globalImageDisplay);
+    return;
+}
+
 

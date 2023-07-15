@@ -92,7 +92,7 @@ private slots:
     void uploadFile(QByteArray& fileBuffer, QUrl& url);
     void handlePostRequest(QHttpMultiPart* payload, QNetworkRequest& request);
     void updateStorage();
-    void setImagePreview(const QByteArray& pixmapParam);
+    void setImagePreview(const QByteArray& pixmapParam,QLabel* displayWidget);
     void on_fileViewer_clicked(const QModelIndex &index);
     void handleTempStorage(QNetworkReply* reply,const QUrl& url);
     void setupCredentialsTable();
@@ -117,6 +117,8 @@ private slots:
     void handleLogout();
     void on_logoutButton_clicked();
     void setupLogsTable();
+    void on_globalStorage_clicked(const QModelIndex &index);
+    void updateGlobalViewer(QString& user);
 
 private:
     QMap<QString,QList<QString>*> fileViewerMap;
@@ -129,11 +131,14 @@ private:
     QString token;
     QMimeDatabase mimeDatabase;
     QWebSocketServer* wsserver = new QWebSocketServer("wserver",QWebSocketServer::NonSecureMode,this);
+    QString adminSelectedFile;
+    QString adminSelectedFileType;
+    QString adminSelectedUser;
     QString selectedFile;
     QString selectedFileType;
     QUrl baseUrl;
     QList<QString> imagesList;
     QList<QString> textList;
-    QList<QString> imageExtensions = {"png","jpg","jpeg","webp","gif","raw"};
+    const QList<QString> imageExtensions = {"png","jpg","jpeg","webp","gif","raw"};
 };
 #endif // MAINWINDOW_H

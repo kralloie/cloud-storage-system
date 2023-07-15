@@ -467,58 +467,7 @@ color:rgb(165, 29, 45);</string>
       <widget class="QWidget" name="adminPage">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <layout class="QGridLayout" name="adminLayout" rowstretch="0,0" columnstretch="0,0,0">
-          <item row="0" column="1">
-           <widget class="QTableWidget" name="userCredentialsTable">
-            <property name="styleSheet">
-             <string notr="true">font-size: 12px;
-background-color: rgb(36, 31, 49);
-border-radius: 5px;
-border-style:outset;
-border-width:2px;
-border-color:rgb(34, 22, 37);</string>
-            </property>
-            <column>
-             <property name="text">
-              <string>ID</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Username</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Password</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Admin Privileges</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="mainPanelButton">
-            <property name="text">
-             <string>Main Panel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" rowspan="2">
-           <widget class="QTreeView" name="globalStorage">
-            <property name="styleSheet">
-             <string notr="true">font-size: 20px;
-background-color: rgb(36, 31, 49);
-border-radius: 5px;
-border-style:outset;
-border-width:2px;
-border-color:rgb(34, 22, 37);</string>
-            </property>
-           </widget>
-          </item>
+         <layout class="QGridLayout" name="adminLayout" rowstretch="0,0" columnstretch="0,0,0,0" columnminimumwidth="0,0,0,0">
           <item row="1" column="1">
            <widget class="QTableWidget" name="logsTable">
             <property name="styleSheet">
@@ -559,6 +508,84 @@ border-color:rgb(34, 22, 37);</string>
               <string>User</string>
              </property>
             </column>
+           </widget>
+          </item>
+          <item row="0" column="2" rowspan="2">
+           <widget class="QTreeView" name="globalStorage">
+            <property name="styleSheet">
+             <string notr="true">font-size: 20px;
+background-color: rgb(36, 31, 49);
+border-radius: 5px;
+border-style:outset;
+border-width:2px;
+border-color:rgb(34, 22, 37);</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="mainPanelButton">
+            <property name="text">
+             <string>Main Panel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QTableWidget" name="userCredentialsTable">
+            <property name="styleSheet">
+             <string notr="true">font-size: 12px;
+background-color: rgb(36, 31, 49);
+border-radius: 5px;
+border-style:outset;
+border-width:2px;
+border-color:rgb(34, 22, 37);</string>
+            </property>
+            <column>
+             <property name="text">
+              <string>ID</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Username</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Password</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Admin Privileges</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="globalImageDisplay">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(36, 31, 49);
+border-radius: 5px;
+border-style:outset;
+border-width:2px;
+border-color:rgb(34, 22, 37);
+</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QTextEdit" name="globalTextEditor">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(36, 31, 49);
+border-radius: 5px;
+border-style:outset;
+border-width:2px;
+border-color:rgb(34, 22, 37);
+</string>
+            </property>
            </widget>
           </item>
          </layout>
