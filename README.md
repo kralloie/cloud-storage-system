@@ -5,26 +5,11 @@ The files inside the API in the storage are just test files to perform operation
 
 
 ## UI:
-![UI example](./images/ui.png)
-
-
-### Bash script example:
-
-
-![Script example](./images/bashscript.png)
-
-
-## Bash commands:
-
-
-```~$ download <file> <where>``` Downloads the specified file in the specified path, defaults to the current directory if path is not specified.
-
-```~$ delete <file>``` Delete the specified file in the cloud storage.
-
-```~$ upload <file>``` Uploads the specified file to the cloud storage.
-
-```~$ getcloudstorage``` Returns a formatted JSON with the storage content.
-
-```~$ modifyfile <file>``` Opens Vim with the specified file and lets you modify it, use `:wq` to exit Vim.
-
-```~$ readfile <file>``` Outputs the content of the specified file in the terminal, take care when doing this with image files.
+### Main Panel
+![UI example](./images/menu.png)
+### Admin Panel
+![Admin panel](./images/adminpanel.png)
+### Register panel
+![Register panel](./images/registerpanel.png)
+### Login Panel
+![Login panel](./images/loginpanel.png)
