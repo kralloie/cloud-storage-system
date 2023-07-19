@@ -866,6 +866,8 @@ void MainWindow::on_globalStorage_clicked(const QModelIndex &index)
 {
     QStandardItemModel* modelPtr = qobject_cast<QStandardItemModel*>(ui->globalStorage->model());
     QStandardItem* itemPtr = modelPtr->itemFromIndex(index);
+    QString itemName = itemPtr->text();
+    if(itemPtr->hasChildren() || (itemName == "Images" || itemName == "Texts")) { return; }
     QModelIndex fileTypeIndex = index.parent();
     QModelIndex userIndex = fileTypeIndex.parent();
     QStandardItem* fileTypeItem = modelPtr->itemFromIndex(fileTypeIndex);
